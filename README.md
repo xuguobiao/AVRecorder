@@ -71,3 +71,8 @@ voiceRecorder.stopRecording();
   public static final int FAILURE_CODE_EXEPTION = -500;
   
 ```
+###### VoiceRecorder
+```java
+// .......
+
+```
