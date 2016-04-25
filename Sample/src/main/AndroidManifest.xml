@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.kido.tandroidlame">
+
+  <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-permission android:name="android.permission.CAMERA"/>
+  <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+  <uses-permission android:name="android.permission.WAKE_LOCK"/>
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+  <permission
+      android:name="android.permission.FLASHLIGHT"
+      android:permissionGroup="android.permission-group.HARDWARE_CONTROLS"
+      android:protectionLevel="normal"/>
+
+  <uses-feature android:name="android.hardware.camera"/>
+  <uses-feature
+      android:name="android.hardware.camera.front"
+      android:required="false"/>
+
+  <application
+      android:allowBackup="true"
+      android:icon="@mipmap/ic_launcher"
+      android:label="@string/app_name"
+      android:supportsRtl="true"
+      android:theme="@style/AppTheme">
+    <activity android:name=".MainActivity">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+    </activity>
+
+
+    <!-- for Video Recorder-->
+    <!--<activity-->
+        <!--android:name="com.kido.videorecorder.manager.FFmpegRecorderActivity"-->
+        <!--android:screenOrientation="portrait"-->
+        <!--android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>-->
+
+    <activity android:name=".Mp3AudioRecordActivity" android:screenOrientation="portrait"/>
+
+    <activity android:name=".Mp4VideoRecorderActivity" android:screenOrientation="portrait"/>
+
+  </application>
+
+</manifest>
