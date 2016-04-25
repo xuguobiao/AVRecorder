@@ -73,6 +73,6 @@ voiceRecorder.stopRecording();
 ```
 ###### VideoRecorder
 ```java
-// .......
+// qdrzwd's project(*.so) seems too large
 
 ```
