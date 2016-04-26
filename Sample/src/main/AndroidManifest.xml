@@ -34,10 +34,10 @@
 
 
     <!-- for Video Recorder-->
-    <!--<activity-->
-        <!--android:name="com.kido.videorecorder.manager.FFmpegRecorderActivity"-->
-        <!--android:screenOrientation="portrait"-->
-        <!--android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>-->
+    <activity
+        android:name="com.kido.videorecorder.RecordVideoActivity"
+        android:screenOrientation="portrait">
+    </activity>
 
     <activity android:name=".Mp3AudioRecordActivity" android:screenOrientation="portrait"/>
 

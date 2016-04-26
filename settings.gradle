@@ -1,1 +1,1 @@
-include ':Sample', ':androidlame'
+include ':Sample', ':androidlame', ':VideoRecorderLib'

@@ -13,7 +13,11 @@ To be continued..
 ```xml
   <uses-permission android:name="android.permission.INTERNET"/>
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+   <!-- for Audio Recorder -->
   <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+
+  <!-- for Video Recorder -->
   <uses-permission android:name="android.permission.WAKE_LOCK"/>
   <uses-permission android:name="android.permission.CAMERA"/>
 
@@ -29,7 +33,7 @@ To be continued..
 
    <!-- for Video Recorder -->
    <activity
-     android:name="com.kido.videorecorder.manager.FFmpegRecorderActivity"
+     android:name="com.kido.videorecorder.RecordVideoActivity"
      android:screenOrientation="portrait"
      android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
 
@@ -70,4 +74,33 @@ voiceRecorder.stopRecording();
 
   public static final int FAILURE_CODE_EXEPTION = -500;
   
+```
+###### VideoRecorder
+```java
+// this will start the recorder activity
+VideoRecorder.getInstance().startRecording(context, new VideoRecorder.OnRecordListener() {
+  @Override
+  public void onFail(int failCode, String failMessage) {
+  }
+
+  @Override
+  public void onFinish(int totalDurationSecond, String savePath) {
+  }
+});
+
+  // failure code below in VideoRecorder
+  public static final int FAILURE_CODE_INIT_ERROR = -10;
+
+  public static final int FAILURE_CODE_PERMISSION_DENY = -100;
+  public static final int FAILURE_CODE_FILE_CREATE_ERROR = -101;
+  public static final int FAILURE_CODE_DURATION_TOO_SHORT = -102;
+  public static final int FAILURE_CODE_WRITE_ERROR = -103;
+  public static final int FAILURE_CODE_UNDER_RECORDING = -104;
+  public static final int FAILURE_CODE_SDCARD_ERROR = -105;
+  public static final int FAILURE_CODE_ON_PAUSE = -106;
+  public static final int FAILURE_CODE_ON_BACK = -107;
+  public static final int FAILURE_CODE_CAMERA_FAIL = -108;
+
+  public static final int FAILURE_CODE_EXEPTION = -500;
+
 ```

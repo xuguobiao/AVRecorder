@@ -7,6 +7,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.kido.videorecorder.VideoRecorder;
+
 
 public class Mp4VideoRecorderActivity extends Activity {
   private TextView statusTextView;
@@ -21,6 +23,17 @@ public class Mp4VideoRecorderActivity extends Activity {
     start.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
+        VideoRecorder.getInstance().startRecording(Mp4VideoRecorderActivity.this, new VideoRecorder.OnRecordListener() {
+          @Override
+          public void onFail(int failCode, String failMessage) {
+            statusTextView.setText("onFail->failCode=" + failCode + ", failMessage=" + failMessage);
+          }
+
+          @Override
+          public void onFinish(int totalDurationSecond, String savePath) {
+            statusTextView.setText("onFinish->totalDurationSecond=" + totalDurationSecond + ", savePath=" + savePath);
+          }
+        });
       }
     });
   }
