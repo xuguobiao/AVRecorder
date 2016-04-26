@@ -102,5 +102,4 @@ VideoRecorder.getInstance().startRecording(context, new VideoRecorder.OnRecordLi
   public static final int FAILURE_CODE_CAMERA_FAIL = -108;
 
   public static final int FAILURE_CODE_EXEPTION = -500;
-
 ```
