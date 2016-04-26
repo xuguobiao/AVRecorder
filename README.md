@@ -1,4 +1,4 @@
-# KidoAVRecorder
+# AVRecorder
 
 Audio and Video Recorder project created by Kido. 
 Audio Recorder based on AndroidLame written by Naman Dwivedi.
