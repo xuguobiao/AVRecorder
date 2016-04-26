@@ -70,14 +70,13 @@ voiceRecorder.startRecording(savePath, new VoiceRecorder.OnRecordListener() {
 voiceRecorder.stopRecording();
 
 // failure code below in VoiceRecorder
-  public static final int FAILURE_CODE_PERMISSION_DENY = -100;
-  public static final int FAILURE_CODE_FILE_CREATE_ERROR = -101;
-  public static final int FAILURE_CODE_DURATION_TOO_SHORT = -102;
-  public static final int FAILURE_CODE_WRITE_ERROR = -103;
-  public static final int FAILURE_CODE_UNDER_RECORDING = -104;
+public static final int FAILURE_CODE_PERMISSION_DENY = -100;
+public static final int FAILURE_CODE_FILE_CREATE_ERROR = -101;
+public static final int FAILURE_CODE_DURATION_TOO_SHORT = -102;
+public static final int FAILURE_CODE_WRITE_ERROR = -103;
+public static final int FAILURE_CODE_UNDER_RECORDING = -104;
 
-  public static final int FAILURE_CODE_EXEPTION = -500;
-  
+public static final int FAILURE_CODE_EXEPTION = -500;
 ```
 ###### VideoRecorder
 ```java
@@ -92,18 +91,18 @@ VideoRecorder.getInstance().startRecording(context, new VideoRecorder.OnRecordLi
   }
 });
 
-  // failure code below in VideoRecorder
-  public static final int FAILURE_CODE_INIT_ERROR = -10;
+// failure code below in VideoRecorder
+public static final int FAILURE_CODE_INIT_ERROR = -10;
 
-  public static final int FAILURE_CODE_PERMISSION_DENY = -100;
-  public static final int FAILURE_CODE_FILE_CREATE_ERROR = -101;
-  public static final int FAILURE_CODE_DURATION_TOO_SHORT = -102;
-  public static final int FAILURE_CODE_WRITE_ERROR = -103;
-  public static final int FAILURE_CODE_UNDER_RECORDING = -104;
-  public static final int FAILURE_CODE_SDCARD_ERROR = -105;
-  public static final int FAILURE_CODE_ON_PAUSE = -106;
-  public static final int FAILURE_CODE_ON_BACK = -107;
-  public static final int FAILURE_CODE_CAMERA_FAIL = -108;
+public static final int FAILURE_CODE_PERMISSION_DENY = -100;
+public static final int FAILURE_CODE_FILE_CREATE_ERROR = -101;
+public static final int FAILURE_CODE_DURATION_TOO_SHORT = -102;
+public static final int FAILURE_CODE_WRITE_ERROR = -103;
+public static final int FAILURE_CODE_UNDER_RECORDING = -104;
+public static final int FAILURE_CODE_SDCARD_ERROR = -105;
+public static final int FAILURE_CODE_ON_PAUSE = -106;
+public static final int FAILURE_CODE_ON_BACK = -107;
+public static final int FAILURE_CODE_CAMERA_FAIL = -108;
 
-  public static final int FAILURE_CODE_EXEPTION = -500;
+public static final int FAILURE_CODE_EXEPTION = -500;
 ```
