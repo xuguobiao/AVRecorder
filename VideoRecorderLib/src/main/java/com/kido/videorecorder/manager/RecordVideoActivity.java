@@ -1,302 +1,251 @@
 package com.kido.videorecorder.manager;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.hardware.Camera;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.ScaleAnimation;
+import android.widget.Button;
 import android.widget.TextView;
 
-import java.lang.ref.WeakReference;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import com.kido.videorecorder.base.utils.FileUtil;
 import com.kido.videorecorder.R;
-import com.kido.videorecorder.base.camera.CameraHelper;
-import com.kido.videorecorder.base.recorder.WXLikeVideoRecorder;
-import com.kido.videorecorder.base.views.CameraPreviewView;
+import com.kido.videorecorder.base.PhoneUtil;
+import com.kido.videorecorder.base.VideoRecorderView;
 
-/**
- * 新视频录制页面
- *
- */
+import java.io.File;
+
 public class RecordVideoActivity extends Activity implements View.OnClickListener {
 
-  public static final String KEY_PATH = "filePath";
+  private View mCancelView, mOkView;
+  private VideoRecorderView mRecoderView;
+  private Button mVideoControllerButton;
+  private TextView mMessageTextView;
 
-  private static final String TAG = "RecordVideoActivity";
 
-  // 输出宽度
-  private static final int OUTPUT_WIDTH = 320;
-  // 输出高度
-  private static final int OUTPUT_HEIGHT = 240;
-  // 宽高比
-  private static final float RATIO = 1f * OUTPUT_WIDTH / OUTPUT_HEIGHT;
+  private boolean isCancel = false;
 
-  private Camera mCamera;
-
-  private WXLikeVideoRecorder mRecorder;
-
-  private TextView mStartTextView;
-
-  private boolean mIsStarted = false;
-  private boolean mIsClickFinished = false;
-  private int mTotalDurationSecond = -1;
-  private static final long INTERVAL_TIMER_MS = 1000;// ms
-  private Timer mRecorderTimer = new Timer();
+  private String mVideoSavePath = null;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    int cameraId = CameraHelper.getDefaultCameraID();
-    // Create an instance of Camera
-    mCamera = CameraHelper.getCameraInstance(cameraId);
-    if (null == mCamera) {
-      sendFailMessage(VideoRecorder.FAILURE_CODE_CAMERA_FAIL, "failed to open camera.");
-      return;
+
+    setContentView(R.layout.activity_record);
+
+    mCancelView = findViewById(R.id.cancelTextView);
+    mOkView = findViewById(R.id.okImageView);
+    mCancelView.setOnClickListener(this);
+    mOkView.setOnClickListener(this);
+
+    mRecoderView = (VideoRecorderView) findViewById(R.id.recoderView);
+    mVideoControllerButton = (Button) findViewById(R.id.videoControllerButton);
+    mMessageTextView = (TextView) findViewById(R.id.messageTextView);
+
+    ViewGroup.LayoutParams params = mRecoderView.getLayoutParams();
+    int[] dev = PhoneUtil.getResolution(this);
+    params.width = dev[0];
+    params.height = (int) (((float) dev[0]));
+    mRecoderView.setLayoutParams(params);
+    mVideoControllerButton.setOnTouchListener(new VideoTouchListener());
+
+    mRecoderView.setRecorderListener(new VideoRecorderView.RecorderListener() {
+
+      @Override
+      public void recording(int maxtime, int nowtime) {
+        DebugLog.log("recording->maxtime=" + maxtime + ", nowtime=" + nowtime);
+      }
+
+      @Override
+      public void recordSuccess(File videoFile) {
+        String videoPath = videoFile != null ? videoFile.getAbsolutePath() : null;
+        DebugLog.log("recordSuccess->videoPaht=" + videoPath);
+        toggleOkButton(true, videoPath);
+        releaseAnimations();
+      }
+
+      @Override
+      public void recordStop() {
+        DebugLog.log("recordStop...");
+      }
+
+      @Override
+      public void recordCancel() {
+        DebugLog.log("recordCancel...");
+        toggleOkButton(false, null);
+        releaseAnimations();
+      }
+
+      @Override
+      public void recordStart() {
+        DebugLog.log("recordStart...");
+        toggleOkButton(false, null);
+      }
+
+      @Override
+      public void videoStop() {
+        DebugLog.log("videoStop...");
+      }
+
+      @Override
+      public void videoStart() {
+        DebugLog.log("videoStart...");
+      }
+
+
+    });
+
+  }
+
+  public class VideoTouchListener implements View.OnTouchListener {
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+
+      switch (event.getAction()) {
+        case MotionEvent.ACTION_DOWN:
+          mRecoderView.startRecord();
+          isCancel = false;
+          pressAnimations();
+          break;
+        case MotionEvent.ACTION_MOVE:
+          if (event.getX() > 0
+              && event.getX() < mVideoControllerButton.getWidth()
+              && event.getY() > 0
+              && event.getY() < mVideoControllerButton.getHeight()) {
+            showPressMessage();
+            isCancel = false;
+          } else {
+            cancelAnimations();
+            isCancel = true;
+          }
+          break;
+        case MotionEvent.ACTION_UP:
+          if (isCancel) {
+            mRecoderView.cancelRecord();
+          } else {
+            mRecoderView.endRecord();
+          }
+          mMessageTextView.setVisibility(View.GONE);
+          releaseAnimations();
+          break;
+        default:
+          break;
+      }
+      return false;
     }
-    // 初始化录像机
-    mRecorder = new WXLikeVideoRecorder(this, FileUtil.MEDIA_FILE_DIR);
-    mRecorder.setOutputSize(OUTPUT_WIDTH, OUTPUT_HEIGHT);
+  }
 
-    setContentView(R.layout.activity_my_recorder);
-    CameraPreviewView preview = (CameraPreviewView) findViewById(R.id.camera_preview);
-    preview.setCamera(mCamera, cameraId);
+  /**
+   * 移动取消弹出动画
+   */
+  public void cancelAnimations() {
+    mMessageTextView.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
+    mMessageTextView.setTextColor(getResources().getColor(android.R.color.white));
+    mMessageTextView.setText(R.string.let_go_cancel);
+  }
 
-    mRecorder.setCameraPreviewView(preview);
+  /**
+   * 显示提示信息
+   */
+  public void showPressMessage() {
+    mMessageTextView.setVisibility(View.VISIBLE);
+    mMessageTextView.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+    mMessageTextView.setTextColor(getResources().getColor(android.R.color.holo_green_light));
+    mMessageTextView.setText(R.string.move_up_cancel);
+  }
 
-    mStartTextView = (TextView) findViewById(R.id.button_start);
-    mStartTextView.setOnClickListener(this);
 
+  /**
+   * 按下时候动画效果
+   */
+  public void pressAnimations() {
+    AnimationSet animationSet = new AnimationSet(true);
+    ScaleAnimation scaleAnimation = new ScaleAnimation(1, 1.5f,
+        1, 1.5f,
+        Animation.RELATIVE_TO_SELF, 0.5f,
+        Animation.RELATIVE_TO_SELF, 0.5f);
+    scaleAnimation.setDuration(200);
+
+    AlphaAnimation alphaAnimation = new AlphaAnimation(1, 0);
+    alphaAnimation.setDuration(200);
+
+    animationSet.addAnimation(scaleAnimation);
+    animationSet.addAnimation(alphaAnimation);
+    animationSet.setFillAfter(true);
+
+    mVideoControllerButton.startAnimation(animationSet);
+  }
+
+  /**
+   * 释放时候动画效果
+   */
+  public void releaseAnimations() {
+    AnimationSet animationSet = new AnimationSet(true);
+    ScaleAnimation scaleAnimation = new ScaleAnimation(1.5f, 1f,
+        1.5f, 1f,
+        Animation.RELATIVE_TO_SELF, 0.5f,
+        Animation.RELATIVE_TO_SELF, 0.5f);
+    scaleAnimation.setDuration(200);
+
+    AlphaAnimation alphaAnimation = new AlphaAnimation(0, 1);
+    alphaAnimation.setDuration(200);
+
+    animationSet.addAnimation(scaleAnimation);
+    animationSet.addAnimation(alphaAnimation);
+    animationSet.setFillAfter(true);
+
+    mMessageTextView.setVisibility(View.GONE);
+    mVideoControllerButton.startAnimation(animationSet);
+  }
+
+  private void toggleOkButton(boolean enable, String videoPath) {
+    mOkView.setEnabled(enable);
+    mVideoSavePath = videoPath;
+  }
+
+  private void sendFailMessage() {
+    if (VideoRecorder.getInstance().getOnRecordListener() != null) {
+      DebugLog.e("sendFailMessage..");
+      VideoRecorder.getInstance().getOnRecordListener().onFail();
+    }
+    VideoRecorder.getInstance().setOnRecordListener(null); // prevent duplicate callback
+    finish();
+  }
+
+  private void sendFinishMessage(String savePath) {
+    if (VideoRecorder.getInstance().getOnRecordListener() != null) {
+      DebugLog.e("sendFinishMessage->savePath=" + savePath);
+      VideoRecorder.getInstance().getOnRecordListener().onFinish(savePath);
+    }
+    VideoRecorder.getInstance().setOnRecordListener(null); // prevent duplicate callback
+    finish();
   }
 
   @Override
   protected void onStop() {
     super.onStop();
-    stopAndRelease();
-    if (!mIsClickFinished) {
-      sendFailMessage(VideoRecorder.FAILURE_CODE_ON_PAUSE, "recorder activity is paused.");
-    }
+    sendFailMessage();
   }
 
   @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    mTimerTask.cancel();
-    mRecorderTimer.cancel();
-    mTimerTask = null;
-    mRecorderTimer = null;
-    releaseCamera();              // release the camera immediately on pause event
-  }
-
-  private TimerTask mTimerTask = new TimerTask() {
-    @Override
-    public void run() {
-      if (mTotalDurationSecond > WXLikeVideoRecorder.MAX_RECORD_TIME / 1000) {
-        this.cancel();
-        stopRecord();
-        return;
-      }
-      mTotalDurationSecond++;
-      final String timeString = formatSecond(mTotalDurationSecond);
-      runOnUiThread(new Runnable() {
-        @Override
-        public void run() {
-          mStartTextView.setText(timeString);
-        }
-      });
-    }
-  };
-
-  private String formatSecond(int totalSecond) {
-    totalSecond = totalSecond < 0 ? 0 : totalSecond;
-    int minute = totalSecond / 60;
-    int second = totalSecond % 60;
-
-    String minuteStr = minute < 10 ? "0" + minute : minute + "";
-    String secondStr = second < 10 ? "0" + second : second + "";
-
-    String timeStr = minuteStr + ":" + secondStr;
-    return timeStr;
-  }
-
-
-  private void stopAndRelease() {
-    if (mRecorder != null && mRecorder.isRecording()) {
-      // 页面不可见就要停止录制
-      mRecorder.stopRecording();
-      // 录制时退出，直接舍弃视频
-    }
-    releaseCamera();              // release the camera immediately on pause event
-  }
-
-  private void releaseCamera() {
-    if (mCamera != null) {
-      mCamera.setPreviewCallback(null);
-      // 释放前先停止预览
-      mCamera.stopPreview();
-      mCamera.release();        // release the camera for other applications
-      mCamera = null;
-    }
-  }
-
-
-  /**
-   * 开始录制
-   */
-  private void startRecord() {
-    if (mRecorder.isRecording()) {
-      return;
-    }
-    if (!FileUtil.isSDCardMounted()) {
-      sendFailMessage(VideoRecorder.FAILURE_CODE_SDCARD_ERROR, "sdcard id unmounted.");
-      return;
-    }
-    // TODO: 2016/4/26  Kido: do other check here
-    // initialize video camera
-    // 录制视频
-    if (!mRecorder.startRecording()) {
-      sendFailMessage(VideoRecorder.FAILURE_CODE_WRITE_ERROR, "video write error.");
-    } else {
-      mTotalDurationSecond = -1;
-      mRecorderTimer.schedule(mTimerTask, 0, INTERVAL_TIMER_MS);
-    }
-  }
-
-
-  /**
-   * 停止录制
-   */
-  private void stopRecord() {
-    mRecorder.stopRecording();
-    mTimerTask.cancel();
-    mRecorderTimer.cancel();
-    String videoPath = mRecorder.getFilePath();
-    // 没有录制视频
-    if (null == videoPath) {
-      sendFailMessage(VideoRecorder.FAILURE_CODE_FILE_CREATE_ERROR, "no video file.");
-      return;
-    }
-    // 告诉宿主页面录制视频的路径
-//            startActivity(new Intent(this, PlayVideoActiviy.class).putExtra(PlayVideoActiviy.KEY_FILE_PATH, videoPath));
-    // TODO: 2016/4/25 callback here
-    sendFinishMessage(mTotalDurationSecond, videoPath);
-  }
-
-  @Override
-  public void onClick(View v) {
-    if (v == mStartTextView) {
-      if (mIsStarted) {
-        mIsClickFinished = true;
-        stopRecord();
-      } else {
-//        mStartTextView.setText("");
-        startRecord();
-      }
-      mIsStarted = !mIsStarted;
-    }
-  }
-
-
-  private void sendFailMessage(int failCode, String failMessage) {
-    if (VideoRecorder.getInstance().getOnRecordListener() != null) {
-      DebugLog.e("sendFailMessage->failCode=" + failCode + ", failMessage=" + failMessage);
-      VideoRecorder.getInstance().getOnRecordListener().onFail(failCode, failMessage);
-    }
-    String videoPath = mRecorder.getFilePath();
-    if (!TextUtils.isEmpty(videoPath)) {
-      new Thread(new StartRecordFailCallbackRunnable(this)).start();
-    }
-    VideoRecorder.getInstance().setOnRecordListener(null); // prevent duplicate callback
-    finish();
-  }
-
-  private void sendFinishMessage(int totalDurationSecond, String savePath) {
-    if (VideoRecorder.getInstance().getOnRecordListener() != null) {
-      DebugLog.e("sendFinishMessage->totalDurationSecond=" + totalDurationSecond + ", savePath=" + savePath);
-      VideoRecorder.getInstance().getOnRecordListener().onFinish(totalDurationSecond, savePath);
-    }
-    VideoRecorder.getInstance().setOnRecordListener(null); // prevent duplicate callback
-    finish();
-  }
-
-  /**
-   * 开始录制失败回调任务
-   *
-   * @author Martin
-   */
-  public static class StartRecordFailCallbackRunnable implements Runnable {
-
-    private WeakReference<RecordVideoActivity> mNewRecordVideoActivityWeakReference;
-
-    public StartRecordFailCallbackRunnable(RecordVideoActivity activity) {
-      mNewRecordVideoActivityWeakReference = new WeakReference<>(activity);
-    }
-
-    @Override
-    public void run() {
-      RecordVideoActivity activity;
-      if (null == (activity = mNewRecordVideoActivityWeakReference.get()))
-        return;
-
-      String filePath = activity.mRecorder.getFilePath();
-      if (!TextUtils.isEmpty(filePath)) {
-        FileUtil.deleteFile(filePath);
-        DebugLog.e("video fail, delete file->" + filePath);
+  public void onClick(View view) {
+    if (view == mCancelView) {
+      sendFailMessage();
+    } else if (view == mOkView) {
+      if (mVideoSavePath != null) {
+        sendFinishMessage(mVideoSavePath);
       }
     }
   }
-//
-//  /**
-//   * 停止录制回调任务
-//   *
-//   * @author Martin
-//   */
-//  public static class StopRecordCallbackRunnable implements Runnable {
-//
-//    private WeakReference<RecordVideoActivity> mNewRecordVideoActivityWeakReference;
-//
-//    public StopRecordCallbackRunnable(RecordVideoActivity activity) {
-//      mNewRecordVideoActivityWeakReference = new WeakReference<>(activity);
-//    }
-//
-//    @Override
-//    public void run() {
-//      RecordVideoActivity activity;
-//      if (null == (activity = mNewRecordVideoActivityWeakReference.get()))
-//        return;
-//
-//      String filePath = activity.mRecorder.getFilePath();
-//      if (!TextUtils.isEmpty(filePath)) {
-//        if (activity.isCancelRecord) {
-//          FileUtil.deleteFile(filePath);
-//        } else {
-//          Toast.makeText(activity, "Video file path: " + filePath, Toast.LENGTH_LONG).show();
-//        }
-//      }
-//    }
-//  }
 
   @Override
   public boolean onKeyDown(int keyCode, KeyEvent event) {
     if (keyCode == KeyEvent.KEYCODE_BACK) {
-      if (mRecorder != null && mRecorder.isRecording()) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(getString(R.string.wenxin_tip));
-        builder.setMessage(getString(R.string.current_video_recording));
-        builder.setPositiveButton(R.string.cancel, null);
-        builder.setNegativeButton(R.string.exit, new DialogInterface.OnClickListener() {
-          @Override
-          public void onClick(DialogInterface dialog, int which) {
-            sendFailMessage(VideoRecorder.FAILURE_CODE_ON_BACK, "user click back while recording.");
-          }
-        });
-        builder.create().show();
-      }
       return true;
     } else {
       return super.onKeyDown(keyCode, event);

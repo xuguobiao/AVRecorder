@@ -32,9 +32,9 @@ public class VideoRecorder {
 
   public interface OnRecordListener {
 
-    void onFail(int failCode, String failMessage);
+    void onFail(); // TODO: 2016/4/26 Kido: 更详细的失败说明
 
-    void onFinish(int totalDurationSecond, String savePath);
+    void onFinish(String savePath);
 
   }
 

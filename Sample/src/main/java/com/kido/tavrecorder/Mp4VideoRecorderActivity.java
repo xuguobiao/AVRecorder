@@ -32,14 +32,14 @@ public class Mp4VideoRecorderActivity extends Activity {
       public void onClick(View v) {
         VideoRecorder.getInstance().startRecording(Mp4VideoRecorderActivity.this, new VideoRecorder.OnRecordListener() {
           @Override
-          public void onFail(int failCode, String failMessage) {
-            statusTextView.setText("onFail->failCode=" + failCode + ", failMessage=" + failMessage);
+          public void onFail() {
+            statusTextView.setText("onFail-");
             open.setVisibility(View.GONE);
           }
 
           @Override
-          public void onFinish(int totalDurationSecond, String savePath) {
-            statusTextView.setText("onFinish->totalDurationSecond=" + totalDurationSecond + ", savePath=" + savePath);
+          public void onFinish(String savePath) {
+            statusTextView.setText("onFinish-> savePath=" + savePath);
             successPath = savePath;
             open.setVisibility(View.VISIBLE);
           }

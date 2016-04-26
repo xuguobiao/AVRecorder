@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@drawable/video_bg"
+              android:orientation="vertical">
+
+  <RelativeLayout
+      android:layout_width="fill_parent"
+      android:layout_height="48dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_alignParentLeft="true"
+        android:gravity="center_vertical"
+        android:id="@+id/cancelTextView"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:text="@string/cancel"
+        android:textColor="@color/holo_green_light"
+        android:textSize="16sp"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:padding="8dp"
+        android:id="@+id/okImageView"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/video_ok"/>
+
+  </RelativeLayout>
+
+  <RelativeLayout
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content">
+
+
+    <com.kido.videorecorder.base.VideoRecorderView
+        android:id="@+id/recoderView"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_alignParentTop="true"
+        >
+
+    </com.kido.videorecorder.base.VideoRecorderView>
+
+    <TextView
+        android:id="@+id/messageTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/recoderView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"
+        android:text="@string/move_up_cancel"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:visibility="gone"
+        android:textColor="@color/holo_green_light"
+        android:textSize="14sp"/>
+
+
+  </RelativeLayout>
+
+  <LinearLayout
+      android:layout_width="fill_parent"
+      android:layout_height="0dip"
+      android:layout_weight="1"
+      android:gravity="center_horizontal|center_vertical">
+
+    <Button
+        android:id="@+id/videoControllerButton"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:text="@string/pressing_capture"
+        android:background="@drawable/dot_green_border_selector"
+        android:textColor="@color/tv_green2white_selector"
+        android:textSize="18sp"
+        />
+
+  </LinearLayout>
+
+</LinearLayout>
