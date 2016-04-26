@@ -2,7 +2,7 @@
 
 Audio and Video Recorder project created by Kido. 
 Audio Recorder based on AndroidLame written by Naman Dwivedi.
-Video Recorder based on VideoRecorder written by szitguy.
+Video Recorder based on VideoRecorder written by szpnygo.
 
 To be continued..
 
@@ -85,7 +85,7 @@ public static final int FAILURE_CODE_EXEPTION = -500;
 // this will start the recorder activity
 VideoRecorder.getInstance().startRecording(context, new VideoRecorder.OnRecordListener() {
   @Override
-  public void onFail() { // reserved to callback with more failure code.
+  public void onFail() { // reserved todos: callback with more failure code.
   }
 
   @Override
