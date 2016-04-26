@@ -44,7 +44,8 @@ To be continued..
 ###### VoiceRecorder
 ```java
 // init recorder
-VoiceRecorder voiceRecorder = new VoiceRecorder();// by default, minDurationSecond = 1, maxDurationSecond = Integer.MAX_VALUE / 2 
+// by default, minDurationSecond = 1, maxDurationSecond = Integer.MAX_VALUE / 2 
+VoiceRecorder voiceRecorder = new VoiceRecorder();
 // or
 VoiceRecorder voiceRecorder = new VoiceRecorder(int minDurationSecond, int maxDurationSecond);
 
