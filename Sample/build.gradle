@@ -6,7 +6,7 @@ model {
     buildToolsVersion  "23.0.2"
 
     defaultConfig {
-      applicationId  "com.kido.tandroidlame"
+      applicationId  "com.kido.tavrecorder"
       minSdkVersion.apiLevel  10
       targetSdkVersion.apiLevel 23
       versionCode  1

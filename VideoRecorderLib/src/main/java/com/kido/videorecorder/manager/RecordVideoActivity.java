@@ -1,11 +1,16 @@
 package com.kido.videorecorder.manager;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.TextView;
 
+import java.lang.ref.WeakReference;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -18,7 +23,6 @@ import com.kido.videorecorder.base.views.CameraPreviewView;
 /**
  * 新视频录制页面
  *
- * @author Martin
  */
 public class RecordVideoActivity extends Activity implements View.OnClickListener {
 
@@ -37,17 +41,12 @@ public class RecordVideoActivity extends Activity implements View.OnClickListene
 
   private WXLikeVideoRecorder mRecorder;
 
-  private static final int CANCEL_RECORD_OFFSET = -100;
-  private float mDownX, mDownY;
-  private boolean isCancelRecord = false;
-
-  private TextView startTextView;
+  private TextView mStartTextView;
 
   private boolean mIsStarted = false;
   private boolean mIsClickFinished = false;
   private int mTotalDurationSecond = -1;
   private static final long INTERVAL_TIMER_MS = 1000;// ms
-  private static final long MAX_DURATION_SECOND = 30 * 60;// 30 minutes
   private Timer mRecorderTimer = new Timer();
 
   @Override
@@ -70,8 +69,8 @@ public class RecordVideoActivity extends Activity implements View.OnClickListene
 
     mRecorder.setCameraPreviewView(preview);
 
-    startTextView = (TextView) findViewById(R.id.button_start);
-    startTextView.setOnClickListener(this);
+    mStartTextView = (TextView) findViewById(R.id.button_start);
+    mStartTextView.setOnClickListener(this);
 
   }
 
@@ -97,7 +96,7 @@ public class RecordVideoActivity extends Activity implements View.OnClickListene
   private TimerTask mTimerTask = new TimerTask() {
     @Override
     public void run() {
-      if (mTotalDurationSecond > MAX_DURATION_SECOND) {
+      if (mTotalDurationSecond > WXLikeVideoRecorder.MAX_RECORD_TIME / 1000) {
         this.cancel();
         stopRecord();
         return;
@@ -107,7 +106,7 @@ public class RecordVideoActivity extends Activity implements View.OnClickListene
       runOnUiThread(new Runnable() {
         @Override
         public void run() {
-          startTextView.setText(timeString);
+          mStartTextView.setText(timeString);
         }
       });
     }
@@ -131,7 +130,6 @@ public class RecordVideoActivity extends Activity implements View.OnClickListene
       // 页面不可见就要停止录制
       mRecorder.stopRecording();
       // 录制时退出，直接舍弃视频
-      FileUtil.deleteFile(mRecorder.getFilePath());
     }
     releaseCamera();              // release the camera immediately on pause event
   }
@@ -163,7 +161,7 @@ public class RecordVideoActivity extends Activity implements View.OnClickListene
     // 录制视频
     if (!mRecorder.startRecording()) {
       sendFailMessage(VideoRecorder.FAILURE_CODE_WRITE_ERROR, "video write error.");
-    }else{
+    } else {
       mTotalDurationSecond = -1;
       mRecorderTimer.schedule(mTimerTask, 0, INTERVAL_TIMER_MS);
     }
@@ -191,12 +189,12 @@ public class RecordVideoActivity extends Activity implements View.OnClickListene
 
   @Override
   public void onClick(View v) {
-    if (v == startTextView) {
+    if (v == mStartTextView) {
       if (mIsStarted) {
         mIsClickFinished = true;
         stopRecord();
       } else {
-//        startTextView.setText("");
+//        mStartTextView.setText("");
         startRecord();
       }
       mIsStarted = !mIsStarted;
@@ -205,47 +203,53 @@ public class RecordVideoActivity extends Activity implements View.OnClickListene
 
 
   private void sendFailMessage(int failCode, String failMessage) {
-    DebugLog.e("sendFailMessage->failCode=" + failCode + ", failMessage=" + failMessage);
     if (VideoRecorder.getInstance().getOnRecordListener() != null) {
+      DebugLog.e("sendFailMessage->failCode=" + failCode + ", failMessage=" + failMessage);
       VideoRecorder.getInstance().getOnRecordListener().onFail(failCode, failMessage);
     }
+    String videoPath = mRecorder.getFilePath();
+    if (!TextUtils.isEmpty(videoPath)) {
+      new Thread(new StartRecordFailCallbackRunnable(this)).start();
+    }
+    VideoRecorder.getInstance().setOnRecordListener(null); // prevent duplicate callback
     finish();
   }
 
   private void sendFinishMessage(int totalDurationSecond, String savePath) {
-    DebugLog.e("sendFinishMessage->totalDurationSecond=" + totalDurationSecond + ", savePath=" + savePath);
     if (VideoRecorder.getInstance().getOnRecordListener() != null) {
+      DebugLog.e("sendFinishMessage->totalDurationSecond=" + totalDurationSecond + ", savePath=" + savePath);
       VideoRecorder.getInstance().getOnRecordListener().onFinish(totalDurationSecond, savePath);
     }
+    VideoRecorder.getInstance().setOnRecordListener(null); // prevent duplicate callback
     finish();
   }
-//
-//  /**
-//   * 开始录制失败回调任务
-//   *
-//   * @author Martin
-//   */
-//  public static class StartRecordFailCallbackRunnable implements Runnable {
-//
-//    private WeakReference<RecordVideoActivity> mNewRecordVideoActivityWeakReference;
-//
-//    public StartRecordFailCallbackRunnable(RecordVideoActivity activity) {
-//      mNewRecordVideoActivityWeakReference = new WeakReference<>(activity);
-//    }
-//
-//    @Override
-//    public void run() {
-//      RecordVideoActivity activity;
-//      if (null == (activity = mNewRecordVideoActivityWeakReference.get()))
-//        return;
-//
-//      String filePath = activity.mRecorder.getFilePath();
-//      if (!TextUtils.isEmpty(filePath)) {
-//        FileUtil.deleteFile(filePath);
-//        Toast.makeText(activity, "Start record failed.", Toast.LENGTH_SHORT).show();
-//      }
-//    }
-//  }
+
+  /**
+   * 开始录制失败回调任务
+   *
+   * @author Martin
+   */
+  public static class StartRecordFailCallbackRunnable implements Runnable {
+
+    private WeakReference<RecordVideoActivity> mNewRecordVideoActivityWeakReference;
+
+    public StartRecordFailCallbackRunnable(RecordVideoActivity activity) {
+      mNewRecordVideoActivityWeakReference = new WeakReference<>(activity);
+    }
+
+    @Override
+    public void run() {
+      RecordVideoActivity activity;
+      if (null == (activity = mNewRecordVideoActivityWeakReference.get()))
+        return;
+
+      String filePath = activity.mRecorder.getFilePath();
+      if (!TextUtils.isEmpty(filePath)) {
+        FileUtil.deleteFile(filePath);
+        DebugLog.e("video fail, delete file->" + filePath);
+      }
+    }
+  }
 //
 //  /**
 //   * 停止录制回调任务
@@ -277,13 +281,25 @@ public class RecordVideoActivity extends Activity implements View.OnClickListene
 //    }
 //  }
 
-//  @Override
-//  public boolean onKeyDown(int keyCode, KeyEvent event) {
-//    if (keyCode == KeyEvent.KEYCODE_BACK) {
-//      // block keycode_back here
-//      return true;
-//    } else {
-//      return super.onKeyDown(keyCode, event);
-//    }
-//  }
+  @Override
+  public boolean onKeyDown(int keyCode, KeyEvent event) {
+    if (keyCode == KeyEvent.KEYCODE_BACK) {
+      if (mRecorder != null && mRecorder.isRecording()) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(R.string.wenxin_tip));
+        builder.setMessage(getString(R.string.current_video_recording));
+        builder.setPositiveButton(R.string.cancel, null);
+        builder.setNegativeButton(R.string.exit, new DialogInterface.OnClickListener() {
+          @Override
+          public void onClick(DialogInterface dialog, int which) {
+            sendFailMessage(VideoRecorder.FAILURE_CODE_ON_BACK, "user click back while recording.");
+          }
+        });
+        builder.create().show();
+      }
+      return true;
+    } else {
+      return super.onKeyDown(keyCode, event);
+    }
+  }
 }

@@ -37,6 +37,7 @@ public class VideoRecorder {
     void onFinish(int totalDurationSecond, String savePath);
 
   }
+
   // 以为目前视频录制时打开activity，为了达到callback的效果而不是onResult监听，此处用了单例
   public static synchronized VideoRecorder getInstance() {
     if (instance == null) {
@@ -55,7 +56,11 @@ public class VideoRecorder {
     context.startActivity(intent);
   }
 
-  public OnRecordListener getOnRecordListener(){
+  public OnRecordListener getOnRecordListener() {
     return mOnRecordListener;
+  }
+
+  void setOnRecordListener(OnRecordListener listener) {
+    mOnRecordListener = listener;
   }
 }
