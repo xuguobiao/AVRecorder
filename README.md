@@ -2,7 +2,7 @@
 
 Audio and Video Recorder project created by Kido. 
 Audio Recorder based on AndroidLame written by Naman Dwivedi.
-Video Recorder based on VideoRecorder written by qdrzwd.
+Video Recorder based on VideoRecorder written by szitguy.
 
 To be continued..
 
