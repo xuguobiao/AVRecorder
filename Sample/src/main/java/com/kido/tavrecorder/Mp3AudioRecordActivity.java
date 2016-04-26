@@ -12,9 +12,11 @@
  * See the GNU General Public License for more details.
  */
 
-package com.kido.tandroidlame;
+package com.kido.tavrecorder;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
@@ -25,19 +27,24 @@ import android.widget.Toast;
 import com.kido.androidlame.manager.DebugLog;
 import com.kido.androidlame.manager.VoiceRecorder;
 
+import java.io.File;
+
 public class Mp3AudioRecordActivity extends Activity {
 
   private TextView statusTextView;
   private VoiceRecorder voiceRecorder;
+  private String successPath = "";
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_audio_record);
 
-    Button start = (Button) findViewById(R.id.startRecording);
-    Button stop = (Button) findViewById(R.id.stopRecording);
-    statusTextView = (TextView)findViewById(R.id.statusText);
+    final Button start = (Button) findViewById(R.id.startRecording);
+    final Button stop = (Button) findViewById(R.id.stopRecording);
+    final Button open = (Button) findViewById(R.id.openMeida);
+
+    statusTextView = (TextView) findViewById(R.id.statusText);
     voiceRecorder = new VoiceRecorder(1, 10);
 
 
@@ -55,14 +62,14 @@ public class Mp3AudioRecordActivity extends Activity {
                   String info = "onRecord->duration=" + curDurationSecond + "s";
                   DebugLog.i(info);
                   statusTextView.setText(info);
-
                 }
 
                 @Override
                 public void onFail(int failCode, String failMessage) {
-                  String info  = "onFail->failCode=" + failCode + ", failMessage=" + failMessage;
+                  String info = "onFail->failCode=" + failCode + ", failMessage=" + failMessage;
                   DebugLog.e(info);
                   statusTextView.setText(info);
+                  open.setVisibility(View.GONE);
                   Toast.makeText(Mp3AudioRecordActivity.this, info, Toast.LENGTH_SHORT).show();
                 }
 
@@ -71,6 +78,8 @@ public class Mp3AudioRecordActivity extends Activity {
                   String info = "onFinish->totalDurationSecond=" + totalDurationSecond + ", savePath=" + savePath;
                   DebugLog.i(info);
                   statusTextView.setText(info);
+                  successPath = savePath;
+                  open.setVisibility(View.VISIBLE);
                   Toast.makeText(Mp3AudioRecordActivity.this, info, Toast.LENGTH_SHORT).show();
                 }
               });
@@ -86,6 +95,17 @@ public class Mp3AudioRecordActivity extends Activity {
       @Override
       public void onClick(View v) {
         voiceRecorder.stopRecording();
+      }
+    });
+
+    open.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        Intent intent = new Intent();
+        intent.setAction(android.content.Intent.ACTION_VIEW);
+        File file = new File(successPath);
+        intent.setDataAndType(Uri.fromFile(file), "audio/*");
+        startActivity(intent);
       }
     });
 

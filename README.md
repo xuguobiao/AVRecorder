@@ -33,7 +33,7 @@ To be continued..
 
    <!-- for Video Recorder -->
    <activity
-     android:name="com.kido.videorecorder.RecordVideoActivity"
+     android:name="com.kido.videorecorder.manager.RecordVideoActivity"
      android:screenOrientation="portrait"
      android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
 

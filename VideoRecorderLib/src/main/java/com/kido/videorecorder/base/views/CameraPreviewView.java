@@ -1,4 +1,4 @@
-package sz.itguy.wxlikevideo.views;
+package com.kido.videorecorder.base.views;
 
 import android.app.Activity;
 import android.content.Context;
@@ -23,13 +23,13 @@ import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.kido.videorecorder.base.camera.CameraHelper;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import sz.itguy.wxlikevideo.R;
-import sz.itguy.wxlikevideo.camera.CameraHelper;
-
+import com.kido.videorecorder.R;
 /**
  * 相机预览视图
  *

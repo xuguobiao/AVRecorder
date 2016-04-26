@@ -1,4 +1,4 @@
-package sz.itguy.utils;
+package com.kido.videorecorder.base.utils;
 
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;

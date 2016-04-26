@@ -55,7 +55,7 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import sz.itguy.utils.SystemVersionUtil;
+import com.kido.videorecorder.base.utils.SystemVersionUtil;
 
 import static org.bytedeco.javacpp.avcodec.AVPacket;
 import static org.bytedeco.javacpp.avcodec.AVPicture;

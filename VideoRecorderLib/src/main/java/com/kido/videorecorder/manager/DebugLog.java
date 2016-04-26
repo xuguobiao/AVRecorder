@@ -1,4 +1,4 @@
-package com.kido.videorecorder;
+package com.kido.videorecorder.manager;
 
 import android.util.Log;
 

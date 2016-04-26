@@ -1,4 +1,4 @@
-package com.kido.tandroidlame;
+package com.kido.tavrecorder;
 
 import android.os.Environment;
 

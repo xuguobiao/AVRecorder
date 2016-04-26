@@ -1,4 +1,4 @@
-package sz.itguy.wxlikevideo.recorder;
+package com.kido.videorecorder.base.recorder;
 
 import android.os.Build;
 

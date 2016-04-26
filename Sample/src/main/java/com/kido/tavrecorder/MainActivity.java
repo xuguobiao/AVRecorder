@@ -1,4 +1,4 @@
-package com.kido.tandroidlame;
+package com.kido.tavrecorder;
 
 import android.app.Activity;
 import android.content.Intent;

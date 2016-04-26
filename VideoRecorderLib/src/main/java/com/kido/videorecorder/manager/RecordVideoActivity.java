@@ -1,21 +1,19 @@
-package com.kido.videorecorder;
+package com.kido.videorecorder.manager;
 
 import android.app.Activity;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
-import sz.itguy.utils.FileUtil;
-import sz.itguy.wxlikevideo.R;
-import sz.itguy.wxlikevideo.camera.CameraHelper;
-import sz.itguy.wxlikevideo.recorder.WXLikeVideoRecorder;
-import sz.itguy.wxlikevideo.views.CameraPreviewView;
-import sz.itguy.wxlikevideo.views.CircleBackgroundTextView;
+import com.kido.videorecorder.base.utils.FileUtil;
+import com.kido.videorecorder.R;
+import com.kido.videorecorder.base.camera.CameraHelper;
+import com.kido.videorecorder.base.recorder.WXLikeVideoRecorder;
+import com.kido.videorecorder.base.views.CameraPreviewView;
 
 /**
  * 新视频录制页面

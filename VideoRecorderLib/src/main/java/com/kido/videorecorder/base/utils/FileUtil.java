@@ -1,4 +1,4 @@
-package sz.itguy.utils;
+package com.kido.videorecorder.base.utils;
 
 import android.net.Uri;
 import android.os.Environment;
@@ -8,7 +8,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import sz.itguy.wxlikevideo.recorder.Constants;
+import com.kido.videorecorder.base.recorder.Constants;
 
 /**
  * Created by Administrator on 2015/9/11.

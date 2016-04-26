@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.kido.tandroidlame">
+          package="com.kido.tavrecorder">
 
   <uses-permission android:name="android.permission.INTERNET"/>
-  <uses-permission android:name="android.permission.CAMERA"/>
-  <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-  <uses-permission android:name="android.permission.WAKE_LOCK"/>
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+  <!-- for Audio Recorder -->
+  <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+
+  <!-- for Video Recorder -->
+  <uses-permission android:name="android.permission.WAKE_LOCK"/>
+  <uses-permission android:name="android.permission.CAMERA"/>
 
   <permission
       android:name="android.permission.FLASHLIGHT"
@@ -24,7 +28,7 @@
       android:label="@string/app_name"
       android:supportsRtl="true"
       android:theme="@style/AppTheme">
-    <activity android:name=".MainActivity">
+    <activity android:name="com.kido.tavrecorder.MainActivity">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
 
@@ -35,13 +39,13 @@
 
     <!-- for Video Recorder-->
     <activity
-        android:name="com.kido.videorecorder.RecordVideoActivity"
+        android:name="com.kido.videorecorder.manager.RecordVideoActivity"
         android:screenOrientation="portrait">
     </activity>
 
-    <activity android:name=".Mp3AudioRecordActivity" android:screenOrientation="portrait"/>
+    <activity android:name="com.kido.tavrecorder.Mp3AudioRecordActivity" android:screenOrientation="portrait"/>
 
-    <activity android:name=".Mp4VideoRecorderActivity" android:screenOrientation="portrait"/>
+    <activity android:name="com.kido.tavrecorder.Mp4VideoRecorderActivity" android:screenOrientation="portrait"/>
 
   </application>
 

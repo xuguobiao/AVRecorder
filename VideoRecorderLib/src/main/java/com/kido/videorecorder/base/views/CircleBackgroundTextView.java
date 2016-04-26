@@ -1,4 +1,4 @@
-package sz.itguy.wxlikevideo.views;
+package com.kido.videorecorder.base.views;
 
 import android.content.Context;
 import android.graphics.Canvas;

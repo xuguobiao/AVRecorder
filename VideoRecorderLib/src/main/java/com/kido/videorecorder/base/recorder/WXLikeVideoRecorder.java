@@ -1,4 +1,4 @@
-package sz.itguy.wxlikevideo.recorder;
+package com.kido.videorecorder.base.recorder;
 
 import android.content.Context;
 import android.graphics.ImageFormat;
@@ -18,8 +18,8 @@ import org.bytedeco.javacv.FrameRecorder;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 
-import sz.itguy.utils.FileUtil;
-import sz.itguy.wxlikevideo.views.CameraPreviewView;
+import com.kido.videorecorder.base.utils.FileUtil;
+import com.kido.videorecorder.base.views.CameraPreviewView;
 
 /**
  * 仿微信录像机

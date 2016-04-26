@@ -1,4 +1,4 @@
-package sz.itguy.utils;
+package com.kido.videorecorder.base.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

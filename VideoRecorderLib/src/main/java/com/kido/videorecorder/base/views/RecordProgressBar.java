@@ -1,4 +1,4 @@
-package sz.itguy.wxlikevideo.views;
+package com.kido.videorecorder.base.views;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -11,7 +11,7 @@ import android.view.View;
 
 import java.lang.ref.WeakReference;
 
-import sz.itguy.wxlikevideo.R;
+import com.kido.videorecorder.R;
 
 /**
  * 录制进度条

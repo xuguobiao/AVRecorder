@@ -1,4 +1,4 @@
-package sz.itguy.wxlikevideo.camera;
+package com.kido.videorecorder.base.camera;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
