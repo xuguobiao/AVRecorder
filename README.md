@@ -27,6 +27,8 @@ To be continued..
       android:protectionLevel="normal"/>
 
   <uses-feature android:name="android.hardware.camera"/>
+  <uses-feature android:name="android.hardware.camera.autofocus"/>
+
   <uses-feature
       android:name="android.hardware.camera.front"
       android:required="false"/>
@@ -83,11 +85,11 @@ public static final int FAILURE_CODE_EXEPTION = -500;
 // this will start the recorder activity
 VideoRecorder.getInstance().startRecording(context, new VideoRecorder.OnRecordListener() {
   @Override
-  public void onFail(int failCode, String failMessage) {
+  public void onFail() { // reserved to callback with more failure code.
   }
 
   @Override
-  public void onFinish(int totalDurationSecond, String savePath) {
+  public void onFinish(String savePath) {
   }
 });
 
