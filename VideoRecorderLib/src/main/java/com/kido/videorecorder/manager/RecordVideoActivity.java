@@ -42,7 +42,7 @@ public class RecordVideoActivity extends Activity implements View.OnClickListene
     mCancelView.setOnClickListener(this);
     mOkView.setOnClickListener(this);
 
-    mRecoderView = (VideoRecorderView) findViewById(R.id.recoderView);
+    mRecoderView = (VideoRecorderView) findViewById(R.id.recoderView); // 这里的RecoderView需设置成和VideoRecorder录制的size比例一致
     mVideoControllerButton = (Button) findViewById(R.id.videoControllerButton);
     mMessageTextView = (TextView) findViewById(R.id.messageTextView);
 

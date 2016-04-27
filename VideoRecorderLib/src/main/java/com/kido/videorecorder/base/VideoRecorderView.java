@@ -46,7 +46,7 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
   private MediaPlayer mediaPlayer;
 
   //时间限制
-  private static final int recordMaxTime = 15;
+  private static final int recordMaxTime = Config.VIDEO_MAX_DURATION_SECOND;
   private int timeCount;
   //生成的文件
   private File vecordFile;
@@ -61,20 +61,19 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
   private RecorderListener recorderListener;
 
   public VideoRecorderView(Context context) {
-    super(context, null);
-    this.context = context;
+    this(context, null);
   }
 
   public VideoRecorderView(Context context, AttributeSet attrs) {
-    super(context, attrs, 0);
+    super(context, attrs);
     this.context = context;
     init();
   }
 
-  public VideoRecorderView(Context context, AttributeSet attrs, int defStyleAttr) {
-    super(context, attrs, defStyleAttr);
-    this.context = context;
-  }
+//  public VideoRecorderView(Context context, AttributeSet attrs, int defStyleAttr) {
+//    super(context, attrs, defStyleAttr);
+//    this.context = context;
+//  }
 
   private void init() {
 
@@ -188,12 +187,11 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
     mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
     mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.MPEG_4_SP);
 
-    mediaRecorder.setVideoSize(352, 288);
-
+    mediaRecorder.setVideoSize(Config.VIDEO_WIDTH, Config.VIDEO_HEIGHT);
+    mediaRecorder.setVideoFrameRate(Config.VIDEO_FRAME_RATE);
+    mediaRecorder.setVideoEncodingBitRate(Config.VIDEO_ENCODING_BIT_RATE);
 //        mediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
-    mediaRecorder.setVideoFrameRate(16);
-    mediaRecorder.setVideoEncodingBitRate(1 * 1024 * 512);
-    mediaRecorder.setOrientationHint(90);
+    mediaRecorder.setOrientationHint(Config.VIDEO_ORIENTATION);
 
     mediaRecorder.setMaxDuration(recordMaxTime * 1000);
     mediaRecorder.setOutputFile(vecordFile.getAbsolutePath());
