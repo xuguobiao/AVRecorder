@@ -22,6 +22,7 @@ import com.kido.videorecorder.manager.DebugLog;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -145,7 +146,7 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
     try {
       mCamera = Camera.open();
     } catch (Exception e) {
-      DebugLog.e("initCamera exception->"  + e.getMessage());
+      DebugLog.e("initCamera exception->" + e.getMessage());
       freeCameraResource();
     }
     if (mCamera == null)
@@ -156,7 +157,7 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
     try {
       mCamera.setPreviewDisplay(mSurfaceHolder);
     } catch (IOException e) {
-      DebugLog.e("setPreviewDisplay exception->"  + e.getMessage());
+      DebugLog.e("setPreviewDisplay exception->" + e.getMessage());
     }
     mCamera.startPreview();
 
@@ -175,10 +176,13 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
    * 初始化摄像头配置
    */
   private void initRecord() {
+
+
     mMediaRecorder = new MediaRecorder();
     mMediaRecorder.reset();
-    if (mCamera != null)
+    if (mCamera != null) {
       mMediaRecorder.setCamera(mCamera);
+    }
 
     mMediaRecorder.setOnErrorListener(this);
     mMediaRecorder.setPreviewDisplay(mSurfaceHolder.getSurface()); // Call this before prepare()
@@ -206,7 +210,7 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
       mMediaRecorder.prepare();
       mMediaRecorder.start();
     } catch (Exception e) {
-      DebugLog.e("prepareRecord exception->"  + e.getMessage());
+      DebugLog.e("prepareRecord exception->" + e.getMessage());
     }
   }
 
@@ -331,11 +335,11 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
       try {
         mMediaRecorder.stop();
       } catch (IllegalStateException e) {
-        DebugLog.e("stopRecord exception->"  + e.getMessage());
+        DebugLog.e("stopRecord exception->" + e.getMessage());
       } catch (RuntimeException e) {
-        DebugLog.e("stopRecord exception->"  + e.getMessage());
+        DebugLog.e("stopRecord exception->" + e.getMessage());
       } catch (Exception e) {
-        DebugLog.e("stopRecord exception->"  + e.getMessage());
+        DebugLog.e("stopRecord exception->" + e.getMessage());
       }
     }
   }
@@ -351,7 +355,7 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
 
   }
 
-  public void releaseAll(){
+  public void releaseAll() {
     destoryMediaPlayer();
     releaseRecord();
     freeCameraResource();
@@ -372,7 +376,7 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
       mMediaPlayer.prepare();// 缓冲
       mMediaPlayer.start();
     } catch (Exception e) {
-      DebugLog.e("playVideo exception->"  + e.getMessage());
+      DebugLog.e("playVideo exception->" + e.getMessage());
     }
     if (mRecorderListener != null)
       mRecorderListener.videoStart();
@@ -459,9 +463,9 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
       try {
         mMediaRecorder.release();
       } catch (IllegalStateException e) {
-        DebugLog.e("releaseRecord exception->"  + e.getMessage());
+        DebugLog.e("releaseRecord exception->" + e.getMessage());
       } catch (Exception e) {
-        DebugLog.e("releaseRecord exception->"  + e.getMessage());
+        DebugLog.e("releaseRecord exception->" + e.getMessage());
       }
     }
     mMediaRecorder = null;
@@ -478,5 +482,44 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
       mCamera.release();
       mCamera = null;
     }
+  }
+
+  private Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int w, int h) {
+
+    final double ASPECT_TOLERANCE = 0.2;
+    double targetRatio = (double) w / h;
+    if (sizes == null)
+      return null;
+
+    Camera.Size optimalSize = null;
+    double minDiff = Double.MAX_VALUE;
+
+    int targetHeight = h;
+
+    // Try to find an size match aspect ratio and size
+    for (Camera.Size size : sizes) {
+      Log.d("Camera", "Checking size " + size.width + "w " + size.height
+          + "h");
+      double ratio = (double) size.width / size.height;
+      if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE)
+        continue;
+      if (Math.abs(size.height - targetHeight) < minDiff) {
+        optimalSize = size;
+        minDiff = Math.abs(size.height - targetHeight);
+      }
+    }
+
+    // Cannot find the one match the aspect ratio, ignore the
+    // requirement
+    if (optimalSize == null) {
+      minDiff = Double.MAX_VALUE;
+      for (Camera.Size size : sizes) {
+        if (Math.abs(size.height - targetHeight) < minDiff) {
+          optimalSize = size;
+          minDiff = Math.abs(size.height - targetHeight);
+        }
+      }
+    }
+    return optimalSize;
   }
 }
