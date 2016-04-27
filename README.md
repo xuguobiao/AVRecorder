@@ -117,3 +117,5 @@ public static final int FAILURE_CODE_EXEPTION = -500;
 
 4.视频录制时涉及失败或者取消的情况，在Listener中的onFail尽可能详细的回调，类似音频回调的FailureCode。
 
+5.自定义视频尺寸（长*宽）、视频最小/最大时长、保存路径等。
+
