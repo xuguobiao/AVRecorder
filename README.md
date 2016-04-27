@@ -43,7 +43,7 @@ To be continued..
 
 ###Java Code
 
-###### VoiceRecorder
+###### VoiceRecorder (Mp3)
 ```java
 // init recorder
 // by default, minDurationSecond = 1, maxDurationSecond = Integer.MAX_VALUE / 2 
@@ -80,12 +80,12 @@ public static final int FAILURE_CODE_UNDER_RECORDING = -104;
 
 public static final int FAILURE_CODE_EXEPTION = -500;
 ```
-###### VideoRecorder
+###### VideoRecorder (Mp4)
 ```java
 // this will start the recorder activity
 VideoRecorder.getInstance().startRecording(context, new VideoRecorder.OnRecordListener() {
   @Override
-  public void onFail() { // reserved todos: callback with more failure code.
+  public void onFail() { // reserved todos: callback with more failure codes.
   }
 
   @Override
