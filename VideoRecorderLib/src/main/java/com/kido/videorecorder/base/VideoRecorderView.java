@@ -17,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import com.kido.videorecorder.R;
+import com.kido.videorecorder.manager.DebugLog;
 
 import java.io.File;
 import java.io.IOException;
@@ -144,7 +145,7 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
     try {
       mCamera = Camera.open();
     } catch (Exception e) {
-      e.printStackTrace();
+      DebugLog.e("initCamera exception->"  + e.getMessage());
       freeCameraResource();
     }
     if (mCamera == null)
@@ -155,7 +156,7 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
     try {
       mCamera.setPreviewDisplay(mSurfaceHolder);
     } catch (IOException e) {
-      e.printStackTrace();
+      DebugLog.e("setPreviewDisplay exception->"  + e.getMessage());
     }
     mCamera.startPreview();
 
@@ -164,7 +165,7 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
       if (Camera.Parameters.FOCUS_MODE_AUTO.equals(focusMode) || Camera.Parameters.FOCUS_MODE_MACRO.equals(focusMode))
         mCamera.autoFocus(null);// This method is only valid when preview is active (between startPreview() and before stopPreview()).
     } catch (Exception e) {
-      Log.e("kido", "autoFocus exception->" + e.getMessage());
+      DebugLog.e("autoFocus exception->" + e.getMessage());
     }
 
     mCamera.unlock();
@@ -180,13 +181,15 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
       mMediaRecorder.setCamera(mCamera);
 
     mMediaRecorder.setOnErrorListener(this);
-    mMediaRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());
-    mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-    mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+    mMediaRecorder.setPreviewDisplay(mSurfaceHolder.getSurface()); // Call this before prepare()
+
+    mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC); // Call this only before setOutputFormat().
+    mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA); // Call this only before setOutputFormat().
 
     mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-    mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-    mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.MPEG_4_SP);
+
+    mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC); // Call this after setOutputFormat() but before prepare().
+    mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.MPEG_4_SP); // Call this after setOutputFormat() and before prepare().
 
     mMediaRecorder.setVideoSize(Config.VIDEO_WIDTH, Config.VIDEO_HEIGHT);
     mMediaRecorder.setVideoFrameRate(Config.VIDEO_FRAME_RATE);
@@ -202,8 +205,8 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
     try {
       mMediaRecorder.prepare();
       mMediaRecorder.start();
-    } catch (IOException e) {
-      e.printStackTrace();
+    } catch (Exception e) {
+      DebugLog.e("prepareRecord exception->"  + e.getMessage());
     }
   }
 
@@ -328,11 +331,11 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
       try {
         mMediaRecorder.stop();
       } catch (IllegalStateException e) {
-        e.printStackTrace();
+        DebugLog.e("stopRecord exception->"  + e.getMessage());
       } catch (RuntimeException e) {
-        e.printStackTrace();
+        DebugLog.e("stopRecord exception->"  + e.getMessage());
       } catch (Exception e) {
-        e.printStackTrace();
+        DebugLog.e("stopRecord exception->"  + e.getMessage());
       }
     }
   }
@@ -345,6 +348,13 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
     mMediaPlayer.reset();
     mMediaPlayer.release();
     mMediaPlayer = null;
+
+  }
+
+  public void releaseAll(){
+    destoryMediaPlayer();
+    releaseRecord();
+    freeCameraResource();
   }
 
   /**
@@ -362,7 +372,7 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
       mMediaPlayer.prepare();// 缓冲
       mMediaPlayer.start();
     } catch (Exception e) {
-      e.printStackTrace();
+      DebugLog.e("playVideo exception->"  + e.getMessage());
     }
     if (mRecorderListener != null)
       mRecorderListener.videoStart();
@@ -449,9 +459,9 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
       try {
         mMediaRecorder.release();
       } catch (IllegalStateException e) {
-        e.printStackTrace();
+        DebugLog.e("releaseRecord exception->"  + e.getMessage());
       } catch (Exception e) {
-        e.printStackTrace();
+        DebugLog.e("releaseRecord exception->"  + e.getMessage());
       }
     }
     mMediaRecorder = null;

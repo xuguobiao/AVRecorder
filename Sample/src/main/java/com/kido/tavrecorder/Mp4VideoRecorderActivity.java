@@ -8,13 +8,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.kido.videorecorder.manager.RecordVideoActivity;
 import com.kido.videorecorder.manager.VideoRecorder;
 
 import java.io.File;
 
 
 public class Mp4VideoRecorderActivity extends Activity {
-  private TextView statusTextView;
+  private TextView mStatusTextView;
+  private Button mStartOnListenerButton, mStartOnResultButton, openMediaButton;
+
   private String successPath = "";
 
   @Override
@@ -22,32 +25,28 @@ public class Mp4VideoRecorderActivity extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_mp4_video_recorder);
 
-    Button start = (Button) findViewById(R.id.startRecording);
-    final Button open = (Button) findViewById(R.id.openMeida);
 
-    statusTextView = (TextView) findViewById(R.id.statusText);
+    mStatusTextView = (TextView) findViewById(R.id.statusText);
+    mStartOnListenerButton = (Button) findViewById(R.id.startOnListener);
+    mStartOnResultButton = (Button) findViewById(R.id.startOnResult);
+    openMediaButton = (Button) findViewById(R.id.openMeida);
 
-    start.setOnClickListener(new View.OnClickListener() {
+    mStartOnListenerButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        VideoRecorder.getsInstance().startRecording(Mp4VideoRecorderActivity.this, new VideoRecorder.OnRecordListener() {
-          @Override
-          public void onFail() {
-            statusTextView.setText("onFail-");
-            open.setVisibility(View.GONE);
-          }
-
-          @Override
-          public void onFinish(String savePath) {
-            statusTextView.setText("onFinish-> savePath=" + savePath);
-            successPath = savePath;
-            open.setVisibility(View.VISIBLE);
-          }
-        });
+        startRecorderOnListener();
       }
     });
 
-    open.setOnClickListener(new View.OnClickListener() {
+    mStartOnResultButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        startRecorderOnResult();
+      }
+    });
+
+
+    openMediaButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
         Intent intent = new Intent();
@@ -57,5 +56,49 @@ public class Mp4VideoRecorderActivity extends Activity {
         startActivity(intent);
       }
     });
+
+  }
+
+  private void startRecorderOnListener(){
+    VideoRecorder.getsInstance().startRecording(Mp4VideoRecorderActivity.this, new VideoRecorder.OnRecordListener() {
+      @Override
+      public void onFail() {
+        mStatusTextView.setText("onFail..");
+        openMediaButton.setVisibility(View.GONE);
+      }
+
+      @Override
+      public void onFinish(String savePath) {
+        mStatusTextView.setText("onFinish-> savePath=" + savePath);
+        successPath = savePath;
+        openMediaButton.setVisibility(View.VISIBLE);
+      }
+    });
+  }
+
+  private void startRecorderOnResult(){
+    Intent intent = new Intent(this, RecordVideoActivity.class);
+    startActivityForResult(intent, REQUEST_CODE_VIDEO);
+  }
+
+  private static final int REQUEST_CODE_VIDEO = 52001;
+
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    if (requestCode == REQUEST_CODE_VIDEO) {
+      if (resultCode == RESULT_OK) {
+        // success
+        String savePath = data.getStringExtra(RecordVideoActivity.KEY_PATH);
+        mStatusTextView.setText("onFinish-> savePath=" + savePath);
+        successPath = savePath;
+        openMediaButton.setVisibility(View.VISIBLE);
+      } else {
+        // failure
+        mStatusTextView.setText("onFail..");
+        openMediaButton.setVisibility(View.GONE);
+      }
+    }
+
   }
 }

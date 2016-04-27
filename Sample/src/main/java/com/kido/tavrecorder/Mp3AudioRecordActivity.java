@@ -40,7 +40,7 @@ public class Mp3AudioRecordActivity extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_audio_record);
 
-    final Button start = (Button) findViewById(R.id.startRecording);
+    final Button start = (Button) findViewById(R.id.startOnListener);
     final Button stop = (Button) findViewById(R.id.stopRecording);
     final Button open = (Button) findViewById(R.id.openMeida);
 

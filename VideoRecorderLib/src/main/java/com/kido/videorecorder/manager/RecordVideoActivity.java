@@ -1,6 +1,7 @@
 package com.kido.videorecorder.manager;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -21,6 +22,7 @@ import java.io.File;
 
 public class RecordVideoActivity extends Activity implements View.OnClickListener {
 
+  public static final String KEY_PATH = "path";
   private View mCancelView, mOkView;
   private VideoRecorderView mRecoderView;
   private Button mVideoControllerButton;
@@ -65,7 +67,9 @@ public class RecordVideoActivity extends Activity implements View.OnClickListene
   @Override
   protected  void onDestroy(){
     // TODO: 2016/4/27 Kido: do some release here
+    mRecoderView.releaseAll();
     super.onDestroy();
+
   }
 
   @Override
@@ -241,20 +245,25 @@ public class RecordVideoActivity extends Activity implements View.OnClickListene
   }
 
   private void sendFailMessage() {
+    DebugLog.e("sendFailMessage..");
     if (VideoRecorder.getsInstance().getOnRecordListener() != null) {
-      DebugLog.e("sendFailMessage..");
       VideoRecorder.getsInstance().getOnRecordListener().onFail();
     }
     VideoRecorder.getsInstance().setOnRecordListener(null); // prevent duplicate callback
+    Intent intent = new Intent();
+    setResult(Activity.RESULT_CANCELED, intent);
     finish();
   }
 
   private void sendFinishMessage(String savePath) {
+    DebugLog.e("sendFinishMessage->savePath=" + savePath);
     if (VideoRecorder.getsInstance().getOnRecordListener() != null) {
-      DebugLog.e("sendFinishMessage->savePath=" + savePath);
       VideoRecorder.getsInstance().getOnRecordListener().onFinish(savePath);
     }
     VideoRecorder.getsInstance().setOnRecordListener(null); // prevent duplicate callback
+    Intent intent = new Intent();
+    intent.putExtra(KEY_PATH, savePath);
+    setResult(Activity.RESULT_OK, intent);
     finish();
   }
 

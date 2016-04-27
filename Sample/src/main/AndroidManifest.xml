@@ -12,6 +12,7 @@
   <uses-permission android:name="android.permission.RECORD_VIDEO" />
   <uses-permission android:name="android.permission.CAMERA"/>
   <uses-permission android:name="android.permission.WAKE_LOCK"/>
+  <uses-permission android:name="android.permission.STORAGE" />
 
   <permission
       android:name="android.permission.FLASHLIGHT"

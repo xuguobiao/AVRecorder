@@ -19,6 +19,7 @@ To be continued..
   <uses-permission android:name="android.permission.RECORD_VIDEO" />
   <uses-permission android:name="android.permission.CAMERA"/>
   <uses-permission android:name="android.permission.WAKE_LOCK"/>
+  <uses-permission android:name="android.permission.STORAGE" />
 
   <permission
       android:name="android.permission.FLASHLIGHT"
@@ -91,6 +92,26 @@ VideoRecorder.getInstance().startRecording(context, new VideoRecorder.OnRecordLi
   public void onFinish(String savePath) {
   }
 });
+
+// or start the RecordActivity directly by using startActivityForResult(..)
+
+  Intent intent = new Intent(this, RecordVideoActivity.class);
+  startActivityForResult(intent, REQUEST_CODE_VIDEO);
+
+  private static final int REQUEST_CODE_VIDEO = 52001;
+
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
+    if (requestCode == REQUEST_CODE_VIDEO) {
+      if (resultCode == RESULT_OK) {
+        // success
+        String savePath = data.getStringExtra(RecordVideoActivity.KEY_PATH);
+      } else {
+        // failure
+      }
+    }
+  }
 
 // failure code below in VideoRecorder
 public static final int FAILURE_CODE_INIT_ERROR = -10;
