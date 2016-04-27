@@ -51,64 +51,94 @@ public class RecordVideoActivity extends Activity implements View.OnClickListene
     params.width = dev[0];
     params.height = (int) (((float) dev[0]));
     mRecoderView.setLayoutParams(params);
+    mRecoderView.setRecorderListener(new VideoRecorderListener());
     mVideoControllerButton.setOnTouchListener(new VideoTouchListener());
-
-    mRecoderView.setRecorderListener(new VideoRecorderView.RecorderListener() {
-
-      @Override
-      public void recording(int maxtime, int nowtime) {
-        DebugLog.log("recording->maxtime=" + maxtime + ", nowtime=" + nowtime);
-      }
-
-      @Override
-      public void recordSuccess(File videoFile) {
-        String videoPath = videoFile != null ? videoFile.getAbsolutePath() : null;
-        DebugLog.log("recordSuccess->videoPaht=" + videoPath);
-        toggleOkButton(true, videoPath);
-        releaseAnimations();
-      }
-
-      @Override
-      public void recordStop() {
-        DebugLog.log("recordStop...");
-      }
-
-      @Override
-      public void recordCancel() {
-        DebugLog.log("recordCancel...");
-        toggleOkButton(false, null);
-        releaseAnimations();
-      }
-
-      @Override
-      public void recordStart() {
-        DebugLog.log("recordStart...");
-        toggleOkButton(false, null);
-      }
-
-      @Override
-      public void videoStop() {
-        DebugLog.log("videoStop...");
-      }
-
-      @Override
-      public void videoStart() {
-        DebugLog.log("videoStart...");
-      }
-
-
-    });
 
   }
 
-  public class VideoTouchListener implements View.OnTouchListener {
+  @Override
+  protected void onStop() {
+    // TODO: 2016/4/27 Kido: let stop being destroy
+    super.onStop();
+  }
+  
+  @Override
+  protected  void onDestroy(){
+    // TODO: 2016/4/27 Kido: do some release here
+    super.onDestroy();
+  }
+
+  @Override
+  public void onClick(View view) {
+    if (view == mCancelView) {
+      sendFailMessage();
+    } else if (view == mOkView) {
+      if (mVideoSavePath != null) {
+        sendFinishMessage(mVideoSavePath);
+      }
+    }
+  }
+
+  @Override
+  public boolean onKeyDown(int keyCode, KeyEvent event) {
+    if (keyCode == KeyEvent.KEYCODE_BACK) {
+      return true;
+    } else {
+      return super.onKeyDown(keyCode, event);
+    }
+  }
+
+  class VideoRecorderListener implements VideoRecorderView.RecorderListener {
+    @Override
+    public void recording(int maxtime, int nowtime) {
+      DebugLog.log("recording->maxtime=" + maxtime + ", nowtime=" + nowtime);
+    }
+
+    @Override
+    public void recordSuccess(File videoFile) {
+      String videoPath = videoFile != null ? videoFile.getAbsolutePath() : null;
+      DebugLog.log("recordSuccess->videoPaht=" + videoPath);
+      toggleOkButton(true, videoPath);
+      releaseAnimations();
+    }
+
+    @Override
+    public void recordStop() {
+      DebugLog.log("recordStop...");
+    }
+
+    @Override
+    public void recordCancel() {
+      DebugLog.log("recordCancel...");
+      toggleOkButton(false, null);
+      releaseAnimations();
+    }
+
+    @Override
+    public void recordStart() {
+      DebugLog.log("recordStart...");
+      toggleOkButton(false, null);
+    }
+
+    @Override
+    public void videoStop() {
+      DebugLog.log("videoStop...");
+    }
+
+    @Override
+    public void videoStart() {
+      DebugLog.log("videoStart...");
+    }
+  }
+
+  class VideoTouchListener implements View.OnTouchListener {
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
 
       switch (event.getAction()) {
         case MotionEvent.ACTION_DOWN:
-          mRecoderView.startRecord();
+          mRecoderView.startRecord();// 有点耗时，影响按下的效果
           isCancel = false;
           pressAnimations();
           break;
@@ -204,51 +234,29 @@ public class RecordVideoActivity extends Activity implements View.OnClickListene
   }
 
   private void toggleOkButton(boolean enable, String videoPath) {
+    int okVisi = enable ? View.VISIBLE : View.INVISIBLE;
     mOkView.setEnabled(enable);
+    mOkView.setVisibility(okVisi);
     mVideoSavePath = videoPath;
   }
 
   private void sendFailMessage() {
-    if (VideoRecorder.getInstance().getOnRecordListener() != null) {
+    if (VideoRecorder.getsInstance().getOnRecordListener() != null) {
       DebugLog.e("sendFailMessage..");
-      VideoRecorder.getInstance().getOnRecordListener().onFail();
+      VideoRecorder.getsInstance().getOnRecordListener().onFail();
     }
-    VideoRecorder.getInstance().setOnRecordListener(null); // prevent duplicate callback
+    VideoRecorder.getsInstance().setOnRecordListener(null); // prevent duplicate callback
     finish();
   }
 
   private void sendFinishMessage(String savePath) {
-    if (VideoRecorder.getInstance().getOnRecordListener() != null) {
+    if (VideoRecorder.getsInstance().getOnRecordListener() != null) {
       DebugLog.e("sendFinishMessage->savePath=" + savePath);
-      VideoRecorder.getInstance().getOnRecordListener().onFinish(savePath);
+      VideoRecorder.getsInstance().getOnRecordListener().onFinish(savePath);
     }
-    VideoRecorder.getInstance().setOnRecordListener(null); // prevent duplicate callback
+    VideoRecorder.getsInstance().setOnRecordListener(null); // prevent duplicate callback
     finish();
   }
 
-  @Override
-  protected void onStop() {
-    super.onStop();
-    sendFailMessage();
-  }
 
-  @Override
-  public void onClick(View view) {
-    if (view == mCancelView) {
-      sendFailMessage();
-    } else if (view == mOkView) {
-      if (mVideoSavePath != null) {
-        sendFinishMessage(mVideoSavePath);
-      }
-    }
-  }
-
-  @Override
-  public boolean onKeyDown(int keyCode, KeyEvent event) {
-    if (keyCode == KeyEvent.KEYCODE_BACK) {
-      return true;
-    } else {
-      return super.onKeyDown(keyCode, event);
-    }
-  }
 }

@@ -20,45 +20,48 @@ import com.kido.videorecorder.R;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnErrorListener {
 
   //视频展示
-  private SurfaceView surfaceView;
-  private SurfaceHolder surfaceHoler;
+  private SurfaceView mSurfaceView;
+  private SurfaceHolder mSurfaceHolder;
 
-  private SurfaceView videoSurfaceView;
-  private ImageView playVideo;
+  private SurfaceView mVideoSurfaceView;
+  private ImageView mPlayVideoImageView;
 
   //进度条
-  private ProgressBar progressBar_left;
-  private ProgressBar progressBar_right;
+  private ProgressBar mProgressBar_left;
+  private ProgressBar mProgressBar_right;
 
   //录制视频
-  private MediaRecorder mediaRecorder;
+  private MediaRecorder mMediaRecorder;
   //摄像头
-  private Camera camera;
-  private Timer timer;
+  private Camera mCamera;
+  private Timer mTimer;
 
   //视频播放
-  private MediaPlayer mediaPlayer;
+  private MediaPlayer mMediaPlayer;
 
   //时间限制
-  private static final int recordMaxTime = Config.VIDEO_MAX_DURATION_SECOND;
-  private int timeCount;
+  private static final int sRecordMaxTime = Config.VIDEO_MAX_DURATION_SECOND;
+  private int mTimeCount;
   //生成的文件
-  private File vecordFile;
+  private File mRecordFile;
 
-  private Context context;
+  private Context mContext;
+
+  private UIHandler mHandler;
 
   //正在录制
-  private boolean isRecording = false;
+  private boolean mIsRecording = false;
   //录制成功
-  private boolean isSuccess = false;
+  private boolean mIsSuccess = false;
 
-  private RecorderListener recorderListener;
+  private RecorderListener mRecorderListener;
 
   public VideoRecorderView(Context context) {
     this(context, null);
@@ -66,37 +69,38 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
 
   public VideoRecorderView(Context context, AttributeSet attrs) {
     super(context, attrs);
-    this.context = context;
+    this.mContext = context;
     init();
   }
 
-//  public VideoRecorderView(Context context, AttributeSet attrs, int defStyleAttr) {
-//    super(context, attrs, defStyleAttr);
-//    this.context = context;
+//  public VideoRecorderView(Context mContext, AttributeSet attrs, int defStyleAttr) {
+//    super(mContext, attrs, defStyleAttr);
+//    this.mContext = mContext;
 //  }
 
   private void init() {
+    mHandler = new UIHandler(this);
 
-    LayoutInflater.from(context).inflate(R.layout.ui_recorder, this);
-    surfaceView = (SurfaceView) findViewById(R.id.surfaceview);
-    videoSurfaceView = (SurfaceView) findViewById(R.id.playView);
-    playVideo = (ImageView) findViewById(R.id.playVideoImageView);
+    LayoutInflater.from(mContext).inflate(R.layout.ui_recorder, this);
+    mSurfaceView = (SurfaceView) findViewById(R.id.surfaceview);
+    mVideoSurfaceView = (SurfaceView) findViewById(R.id.playView);
+    mPlayVideoImageView = (ImageView) findViewById(R.id.playVideoImageView);
 
-    progressBar_left = (ProgressBar) findViewById(R.id.progressBar_left);
-    progressBar_right = (ProgressBar) findViewById(R.id.progressBar_right);
+    mProgressBar_left = (ProgressBar) findViewById(R.id.progressBar_left);
+    mProgressBar_right = (ProgressBar) findViewById(R.id.progressBar_right);
 
-    progressBar_left.setMax(recordMaxTime * 20);
-    progressBar_right.setMax(recordMaxTime * 20);
+    mProgressBar_left.setMax(sRecordMaxTime * 20);
+    mProgressBar_right.setMax(sRecordMaxTime * 20);
 
-    progressBar_left.setProgress(recordMaxTime * 20);
+    mProgressBar_left.setProgress(sRecordMaxTime * 20);
 
-    surfaceHoler = surfaceView.getHolder();
-    surfaceHoler.addCallback(new CustomCallBack());
-    surfaceHoler.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+    mSurfaceHolder = mSurfaceView.getHolder();
+    mSurfaceHolder.addCallback(new CustomCallBack());
+    mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
     initCamera();
 
-    playVideo.setOnClickListener(new OnClickListener() {
+    mPlayVideoImageView.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View v) {
         playVideo();
@@ -137,70 +141,69 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
    * 初始化摄像头
    */
   private void initCamera() {
-    if (camera != null)
+    if (mCamera != null)
       freeCameraResource();
     try {
-      camera = Camera.open();
+      mCamera = Camera.open();
     } catch (Exception e) {
       e.printStackTrace();
       freeCameraResource();
     }
-    if (camera == null)
+    if (mCamera == null)
       return;
 
-    camera.setDisplayOrientation(90);
-    new Handler().postDelayed(new Runnable() {
-      @Override
-      public void run() {
-        try {
-          camera.autoFocus(null);
-        } catch (Exception e) {
-          Log.e("kido", "autoFocus exception->" + e.getMessage());
-        }
-      }
-    }, 500);
+    mCamera.setDisplayOrientation(Config.VIDEO_ORIENTATION);
+
     try {
-      camera.setPreviewDisplay(surfaceHoler);
+      mCamera.setPreviewDisplay(mSurfaceHolder);
     } catch (IOException e) {
       e.printStackTrace();
     }
-    camera.startPreview();
-    camera.unlock();
+    mCamera.startPreview();
+
+    try {
+      String focusMode = mCamera.getParameters().getFocusMode();
+      if (Camera.Parameters.FOCUS_MODE_AUTO.equals(focusMode) || Camera.Parameters.FOCUS_MODE_MACRO.equals(focusMode))
+        mCamera.autoFocus(null);// This method is only valid when preview is active (between startPreview() and before stopPreview()).
+    } catch (Exception e) {
+      Log.e("kido", "autoFocus exception->" + e.getMessage());
+    }
+
+    mCamera.unlock();
   }
 
   /**
    * 初始化摄像头配置
    */
   private void initRecord() {
-    mediaRecorder = new MediaRecorder();
-    mediaRecorder.reset();
-    if (camera != null)
-      mediaRecorder.setCamera(camera);
+    mMediaRecorder = new MediaRecorder();
+    mMediaRecorder.reset();
+    if (mCamera != null)
+      mMediaRecorder.setCamera(mCamera);
 
-    mediaRecorder.setOnErrorListener(this);
-    mediaRecorder.setPreviewDisplay(surfaceHoler.getSurface());
-    mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-    mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+    mMediaRecorder.setOnErrorListener(this);
+    mMediaRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());
+    mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+    mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
 
+    mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+    mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+    mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.MPEG_4_SP);
 
-    mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-    mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-    mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.MPEG_4_SP);
+    mMediaRecorder.setVideoSize(Config.VIDEO_WIDTH, Config.VIDEO_HEIGHT);
+    mMediaRecorder.setVideoFrameRate(Config.VIDEO_FRAME_RATE);
+    mMediaRecorder.setVideoEncodingBitRate(Config.VIDEO_ENCODING_BIT_RATE);
+//        mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
+    mMediaRecorder.setOrientationHint(Config.VIDEO_ORIENTATION);
 
-    mediaRecorder.setVideoSize(Config.VIDEO_WIDTH, Config.VIDEO_HEIGHT);
-    mediaRecorder.setVideoFrameRate(Config.VIDEO_FRAME_RATE);
-    mediaRecorder.setVideoEncodingBitRate(Config.VIDEO_ENCODING_BIT_RATE);
-//        mediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
-    mediaRecorder.setOrientationHint(Config.VIDEO_ORIENTATION);
-
-    mediaRecorder.setMaxDuration(recordMaxTime * 1000);
-    mediaRecorder.setOutputFile(vecordFile.getAbsolutePath());
+    mMediaRecorder.setMaxDuration(sRecordMaxTime * 1000);
+    mMediaRecorder.setOutputFile(mRecordFile.getAbsolutePath());
   }
 
   private void prepareRecord() {
     try {
-      mediaRecorder.prepare();
-      mediaRecorder.start();
+      mMediaRecorder.prepare();
+      mMediaRecorder.start();
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -212,89 +215,102 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
   public void startRecord() {
 
     //录制中
-    if (isRecording)
+    if (mIsRecording)
       return;
     //创建文件
     createRecordDir();
 
     initCamera();
 
-    videoSurfaceView.setVisibility(View.GONE);
-    playVideo.setVisibility(View.GONE);
-    surfaceView.setVisibility(View.VISIBLE);
+    mVideoSurfaceView.setVisibility(View.GONE);
+    mPlayVideoImageView.setVisibility(View.GONE);
+    mSurfaceView.setVisibility(View.VISIBLE);
 
     //初始化控件
     initRecord();
     prepareRecord();
-    isRecording = true;
-    if (recorderListener != null)
-      recorderListener.recordStart();
+    mIsRecording = true;
+    if (mRecorderListener != null)
+      mRecorderListener.recordStart();
     //10秒自动化结束
-    timeCount = 0;
-    timer = new Timer();
-    timer.schedule(new TimerTask() {
+    mTimeCount = 0;
+    mTimer = new Timer();
+    mTimer.schedule(new TimerTask() {
       @Override
       public void run() {
-        timeCount++;
-        progressBar_left.setProgress(timeCount);
-        progressBar_right.setProgress(recordMaxTime * 20 - timeCount);
-        if (recorderListener != null)
-          recorderListener.recording(recordMaxTime * 1000, timeCount * 50);
-        if (timeCount == recordMaxTime * 20) {
+        mTimeCount++;
+        mProgressBar_left.setProgress(mTimeCount);
+        mProgressBar_right.setProgress(sRecordMaxTime * 20 - mTimeCount);
+        if (mRecorderListener != null)
+          mRecorderListener.recording(sRecordMaxTime * 1000, mTimeCount * 50);
+        if (mTimeCount == sRecordMaxTime * 20) {
           Message message = new Message();
-          message.what = 1;
-          handler.sendMessage(message);
+          message.what = MESSAGE_VIDEO_END;
+          mHandler.sendMessage(message);
         }
       }
     }, 0, 50);
   }
 
-  Handler handler = new Handler() {
+  private static final int MESSAGE_VIDEO_END = 1;
+
+  private static class UIHandler extends Handler {
+    private VideoRecorderView mRecorderView = null;
+
+    public UIHandler(VideoRecorderView videoRecorderView) {
+      mRecorderView = new WeakReference<VideoRecorderView>(videoRecorderView).get();
+    }
+
     @Override
     public void handleMessage(Message msg) {
       super.handleMessage(msg);
-      if (msg.what == 1) {
-        endRecord();
+      if (mRecorderView == null) {
+        return;
+      }
+      switch (msg.what) {
+        case MESSAGE_VIDEO_END:
+          mRecorderView.endRecord();
+          break;
       }
     }
-  };
+  }
 
   /**
    * 停止录制
    */
   public void endRecord() {
-    if (!isRecording)
+    if (!mIsRecording)
       return;
-    isRecording = false;
-    if (recorderListener != null) {
-      recorderListener.recordStop();
-      recorderListener.recordSuccess(vecordFile);
+    mIsRecording = false;
+    if (mRecorderListener != null) {
+      mRecorderListener.recordStop();
+      mRecorderListener.recordSuccess(mRecordFile);
     }
     stopRecord();
     releaseRecord();
     freeCameraResource();
-    videoSurfaceView.setVisibility(View.VISIBLE);
-    playVideo.setVisibility(View.VISIBLE);
+    mVideoSurfaceView.setVisibility(View.VISIBLE);
+    mPlayVideoImageView.setVisibility(View.VISIBLE);
   }
 
   /**
    * 取消录制
    */
   public void cancelRecord() {
-    videoSurfaceView.setVisibility(View.GONE);
-    playVideo.setVisibility(View.GONE);
-    surfaceView.setVisibility(View.VISIBLE);
-    if (!isRecording)
+    mVideoSurfaceView.setVisibility(View.GONE);
+    mPlayVideoImageView.setVisibility(View.GONE);
+    mSurfaceView.setVisibility(View.VISIBLE);
+    if (!mIsRecording)
       return;
-    isRecording = false;
+    mIsRecording = false;
     stopRecord();
     releaseRecord();
     freeCameraResource();
-    isRecording = false;
-    if (vecordFile.exists())
-      vecordFile.delete();
-    if (recorderListener != null)
-      recorderListener.recordCancel();
+    mIsRecording = false;
+    if (mRecordFile.exists())
+      mRecordFile.delete();
+    if (mRecorderListener != null)
+      mRecorderListener.recordCancel();
     initCamera();
   }
 
@@ -302,17 +318,17 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
    * 停止录制
    */
   private void stopRecord() {
-    progressBar_left.setProgress(recordMaxTime * 20);
-    progressBar_right.setProgress(0);
+    mProgressBar_left.setProgress(sRecordMaxTime * 20);
+    mProgressBar_right.setProgress(0);
 
-    if (timer != null)
-      timer.cancel();
-    if (mediaRecorder != null) {
+    if (mTimer != null)
+      mTimer.cancel();
+    if (mMediaRecorder != null) {
       // 设置后不会崩
-      mediaRecorder.setOnErrorListener(null);
-      mediaRecorder.setPreviewDisplay(null);
+      mMediaRecorder.setOnErrorListener(null);
+      mMediaRecorder.setPreviewDisplay(null);
       try {
-        mediaRecorder.stop();
+        mMediaRecorder.stop();
       } catch (IllegalStateException e) {
         e.printStackTrace();
       } catch (RuntimeException e) {
@@ -325,62 +341,62 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
 
 
   public void destoryMediaPlayer() {
-    if (mediaPlayer == null)
+    if (mMediaPlayer == null)
       return;
-    mediaPlayer.setDisplay(null);
-    mediaPlayer.reset();
-    mediaPlayer.release();
-    mediaPlayer = null;
+    mMediaPlayer.setDisplay(null);
+    mMediaPlayer.reset();
+    mMediaPlayer.release();
+    mMediaPlayer = null;
   }
 
   /**
    * 播放视频
    */
   public void playVideo() {
-    surfaceView.setVisibility(View.GONE);
-    videoSurfaceView.setVisibility(View.VISIBLE);
-    playVideo.setVisibility(View.GONE);
-    mediaPlayer = new MediaPlayer();
+    mSurfaceView.setVisibility(View.GONE);
+    mVideoSurfaceView.setVisibility(View.VISIBLE);
+    mPlayVideoImageView.setVisibility(View.GONE);
+    mMediaPlayer = new MediaPlayer();
     try {
-      mediaPlayer.reset();
-      mediaPlayer.setDataSource(vecordFile.getAbsolutePath());
-      mediaPlayer.setDisplay(videoSurfaceView.getHolder());
-      mediaPlayer.prepare();//缓冲
-      mediaPlayer.start();
+      mMediaPlayer.reset();
+      mMediaPlayer.setDataSource(mRecordFile.getAbsolutePath());
+      mMediaPlayer.setDisplay(mVideoSurfaceView.getHolder());
+      mMediaPlayer.prepare();//缓冲
+      mMediaPlayer.start();
     } catch (Exception e) {
       e.printStackTrace();
     }
-    if (recorderListener != null)
-      recorderListener.videoStart();
-    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+    if (mRecorderListener != null)
+      mRecorderListener.videoStart();
+    mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
       @Override
       public void onCompletion(MediaPlayer mp) {
-        if (recorderListener != null)
-          recorderListener.videoStop();
-        playVideo.setVisibility(View.VISIBLE);
+        if (mRecorderListener != null)
+          mRecorderListener.videoStop();
+        mPlayVideoImageView.setVisibility(View.VISIBLE);
       }
     });
   }
 
   public RecorderListener getRecorderListener() {
-    return recorderListener;
+    return mRecorderListener;
   }
 
-  public void setRecorderListener(RecorderListener recorderListener) {
-    this.recorderListener = recorderListener;
+  public void setRecorderListener(RecorderListener mRecorderListener) {
+    this.mRecorderListener = mRecorderListener;
   }
 
   public SurfaceView getSurfaceView() {
 
-    return surfaceView;
+    return mSurfaceView;
   }
 
   public void setSurfaceView(SurfaceView surfaceView) {
-    this.surfaceView = surfaceView;
+    this.mSurfaceView = surfaceView;
   }
 
   public MediaPlayer getMediaPlayer() {
-    return mediaPlayer;
+    return mMediaPlayer;
   }
 
   public interface RecorderListener {
@@ -411,9 +427,9 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
     }
     File vecordDir = sampleDir;
     // 创建文件
-    vecordFile = new File(vecordDir, Consts.RECORDING_TMP_MP4_NAME);
+    mRecordFile = new File(vecordDir, Consts.RECORDING_TMP_MP4_NAME);
 //    try {
-//      vecordFile = File.createTempFile(Consts.PREF_RECORDING, ".mp4", vecordDir);// mp4格式
+//      mRecordFile = File.createTempFile(Consts.PREF_RECORDING, ".mp4", vecordDir);// mp4格式
 //    } catch (IOException e) {
 //    }
   }
@@ -422,29 +438,29 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
    * 释放资源
    */
   private void releaseRecord() {
-    if (mediaRecorder != null) {
-      mediaRecorder.setOnErrorListener(null);
+    if (mMediaRecorder != null) {
+      mMediaRecorder.setOnErrorListener(null);
       try {
-        mediaRecorder.release();
+        mMediaRecorder.release();
       } catch (IllegalStateException e) {
         e.printStackTrace();
       } catch (Exception e) {
         e.printStackTrace();
       }
     }
-    mediaRecorder = null;
+    mMediaRecorder = null;
   }
 
   /**
    * 释放摄像头资源
    */
   private void freeCameraResource() {
-    if (null != camera) {
-      camera.setPreviewCallback(null);
-      camera.stopPreview();
-      camera.lock();
-      camera.release();
-      camera = null;
+    if (null != mCamera) {
+      mCamera.setPreviewCallback(null);
+      mCamera.stopPreview();
+      mCamera.lock();// Since API level 14, camera is automatically locked for applications in start().
+      mCamera.release();
+      mCamera = null;
     }
   }
 }

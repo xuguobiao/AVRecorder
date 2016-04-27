@@ -30,7 +30,7 @@ public class Mp4VideoRecorderActivity extends Activity {
     start.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        VideoRecorder.getInstance().startRecording(Mp4VideoRecorderActivity.this, new VideoRecorder.OnRecordListener() {
+        VideoRecorder.getsInstance().startRecording(Mp4VideoRecorderActivity.this, new VideoRecorder.OnRecordListener() {
           @Override
           public void onFail() {
             statusTextView.setText("onFail-");

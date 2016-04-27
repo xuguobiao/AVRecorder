@@ -55,8 +55,7 @@ public class VoiceRecorder {
     void onRecord(int curDurationSecond);
 
     /**
-     *
-     * @param failCode VoiceRecorder.ILURE_CODE_XXX
+     * @param failCode    VoiceRecorder.ILURE_CODE_XXX
      * @param failMessage 失败信息,可能为空
      */
     void onFail(int failCode, String failMessage);
@@ -306,7 +305,9 @@ public class VoiceRecorder {
     @Override
     public void handleMessage(Message msg) {
       super.handleMessage(msg);
-
+      if (mVoiceRecorder == null) {
+        return;
+      }
       switch (msg.what) {
         case MESSAGE_RECORD_FAIL:
           int failCode = msg.arg1;

@@ -26,7 +26,7 @@ public class VideoRecorder {
 
   public static final int FAILURE_CODE_EXEPTION = -500;
 
-  private static VideoRecorder instance;
+  private static VideoRecorder sInstance;
 
   private OnRecordListener mOnRecordListener;
 
@@ -39,11 +39,11 @@ public class VideoRecorder {
   }
 
   // 以为目前视频录制时打开activity，为了达到callback的效果而不是onResult监听，此处用了单例
-  public static synchronized VideoRecorder getInstance() {
-    if (instance == null) {
-      instance = new VideoRecorder();
+  public static synchronized VideoRecorder getsInstance() {
+    if (sInstance == null) {
+      sInstance = new VideoRecorder();
     }
-    return instance;
+    return sInstance;
   }
 
   /**
