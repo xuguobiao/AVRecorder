@@ -142,3 +142,5 @@ public static final int FAILURE_CODE_EXEPTION = -500;
 
 6. 资源的分配和释放，应该考虑更加周全一点。
 
+7. 多机型测试，估计会存在一些bug。 
+
