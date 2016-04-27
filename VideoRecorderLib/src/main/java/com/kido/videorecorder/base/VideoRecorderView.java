@@ -26,39 +26,38 @@ import java.util.TimerTask;
 
 public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnErrorListener {
 
-  //视频展示
+  // 视频展示
   private SurfaceView mSurfaceView;
   private SurfaceHolder mSurfaceHolder;
 
   private SurfaceView mVideoSurfaceView;
   private ImageView mPlayVideoImageView;
 
-  //进度条
+  // 进度条
   private ProgressBar mProgressBar_left;
   private ProgressBar mProgressBar_right;
 
-  //录制视频
+  // 录制视频
   private MediaRecorder mMediaRecorder;
-  //摄像头
+  // 摄像头
   private Camera mCamera;
   private Timer mTimer;
 
-  //视频播放
+  // 视频播放
   private MediaPlayer mMediaPlayer;
 
-  //时间限制
+  // 时间限制
   private static final int sRecordMaxTime = Config.VIDEO_MAX_DURATION_SECOND;
   private int mTimeCount;
-  //生成的文件
+  // 生成的文件
   private File mRecordFile;
 
   private Context mContext;
-
   private UIHandler mHandler;
 
-  //正在录制
+  // 正在录制
   private boolean mIsRecording = false;
-  //录制成功
+  // 录制成功
   private boolean mIsSuccess = false;
 
   private RecorderListener mRecorderListener;
@@ -117,7 +116,6 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
     }
 
     @Override
@@ -214,10 +212,10 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
    */
   public void startRecord() {
 
-    //录制中
+    // 录制中
     if (mIsRecording)
       return;
-    //创建文件
+    // 创建文件
     createRecordDir();
 
     initCamera();
@@ -226,13 +224,13 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
     mPlayVideoImageView.setVisibility(View.GONE);
     mSurfaceView.setVisibility(View.VISIBLE);
 
-    //初始化控件
+    // 初始化控件
     initRecord();
     prepareRecord();
     mIsRecording = true;
     if (mRecorderListener != null)
       mRecorderListener.recordStart();
-    //10秒自动化结束
+    // 到底可录制的最大时长就自动化结束
     mTimeCount = 0;
     mTimer = new Timer();
     mTimer.schedule(new TimerTask() {
@@ -361,7 +359,7 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
       mMediaPlayer.reset();
       mMediaPlayer.setDataSource(mRecordFile.getAbsolutePath());
       mMediaPlayer.setDisplay(mVideoSurfaceView.getHolder());
-      mMediaPlayer.prepare();//缓冲
+      mMediaPlayer.prepare();// 缓冲
       mMediaPlayer.start();
     } catch (Exception e) {
       e.printStackTrace();
@@ -401,19 +399,19 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
 
   public interface RecorderListener {
 
-    public void recording(int maxtime, int nowtime);
+    void recording(int maxtime, int nowtime);
 
-    public void recordSuccess(File videoFile);
+    void recordSuccess(File videoFile);
 
-    public void recordStop();
+    void recordStop();
 
-    public void recordCancel();
+    void recordCancel();
 
-    public void recordStart();
+    void recordStart();
 
-    public void videoStop();
+    void videoStop();
 
-    public void videoStart();
+    void videoStart();
   }
 
 
@@ -432,6 +430,14 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
 //      mRecordFile = File.createTempFile(Consts.PREF_RECORDING, ".mp4", vecordDir);// mp4格式
 //    } catch (IOException e) {
 //    }
+  }
+
+  private void deleteRecordDir() {
+    if (mRecordFile != null) {
+      if (mRecordFile.exists()) {
+        mRecordFile.delete();
+      }
+    }
   }
 
   /**
