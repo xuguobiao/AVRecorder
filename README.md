@@ -114,3 +114,6 @@ public static final int FAILURE_CODE_EXEPTION = -500;
 2.视频录制，保证清晰度的同时尽可能压缩容量。
 
 3.视频录制界面的UI和交互的优化。
+
+4.视频录制时涉及失败或者取消的情况，在Listener中的onFail尽可能详细的回调，类似音频回调的FailureCode。
+
