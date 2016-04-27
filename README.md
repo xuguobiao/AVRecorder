@@ -1,8 +1,6 @@
 # AVRecorder
 
 Audio and Video Recorder project created by Kido. 
-Audio Recorder based on AndroidLame written by Naman Dwivedi.
-Video Recorder based on VideoRecorder written by szpnygo.
 
 To be continued..
 
@@ -108,3 +106,17 @@ public static final int FAILURE_CODE_CAMERA_FAIL = -108;
 
 public static final int FAILURE_CODE_EXEPTION = -500;
 ```
+#Todos
+
+1. 音频和视频开始录制之前涉及的权限检测、存储检测等以及提示。
+
+2. 视频录制，保证清晰度的同时尽可能压缩容量。
+
+3. 视频录制界面的UI和交互的优化。
+
+4. 视频录制时涉及失败或者取消的情况，在Listener中的onFail尽可能详细的回调，类似音频回调的FailureCode。
+
+5. 自定义视频尺寸（长*宽）、视频最小/最大时长、保存路径等。
+
+6. 资源的分配和释放，应该考虑更加周全一点。
+
