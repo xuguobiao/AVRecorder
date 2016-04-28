@@ -9,7 +9,7 @@ public class Config {
 
   public static final int VIDEO_WIDTH = 352;
   public static final int VIDEO_HEIGHT = 288;
-  // QUALITY_CIF(h*w) 352*288 horizontal
+  // CamcorderProfile.QUALITY_CIF 352*288 horizontal
 
   public static final int VIDEO_FRAME_RATE = 16;
   public static final int VIDEO_ENCODING_BIT_RATE = 2 * 1024 * 512;

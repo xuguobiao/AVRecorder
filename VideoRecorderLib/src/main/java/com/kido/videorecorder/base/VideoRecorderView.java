@@ -199,12 +199,12 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
     mMediaRecorder.setVideoFrameRate(Config.VIDEO_FRAME_RATE);
     mMediaRecorder.setVideoEncodingBitRate(Config.VIDEO_ENCODING_BIT_RATE);
 
-    CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_CIF);
+//    CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_480P);
 //    profile.fileFormat = MediaRecorder.OutputFormat.MPEG_4;
 //    profile.videoCodec = MediaRecorder.VideoEncoder.MPEG_4_SP;
 //    mMediaRecorder.setProfile(profile);
-    mMediaRecorder.setOrientationHint(Config.VIDEO_ORIENTATION);
 
+    mMediaRecorder.setOrientationHint(Config.VIDEO_ORIENTATION);
 
     mMediaRecorder.setMaxDuration(sRecordMaxTime * 1000);
     mMediaRecorder.setOutputFile(mRecordFile.getAbsolutePath());
