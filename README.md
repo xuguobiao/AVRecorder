@@ -129,7 +129,12 @@ public static final int FAILURE_CODE_CAMERA_FAIL = -108;
 public static final int FAILURE_CODE_EXEPTION = -500;
 ```
 #About Video
+#####Quality versus Streaming
+![image](img/quality_versus_streaming.png)
+
+#####Recommended bitrate values
 ![image](img/video_parameters.png)
+
 
 #Todos
 

@@ -144,7 +144,7 @@ public class RecordVideoActivity extends Activity implements View.OnClickListene
 
       switch (event.getAction()) {
         case MotionEvent.ACTION_DOWN:
-          mRecoderView.startRecord();// 有点耗时，影响按下的效果
+          mRecoderView.startRecord();// 有点耗时，影响按下的效果，里面涉及耗时的非UI操作考虑放线程
           isCancel = false;
           pressAnimations();
           break;
