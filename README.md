@@ -128,6 +128,9 @@ public static final int FAILURE_CODE_CAMERA_FAIL = -108;
 
 public static final int FAILURE_CODE_EXEPTION = -500;
 ```
+#About Video
+![image](img/video_parameters.png)
+
 #Todos
 
 1. 音频和视频开始录制之前涉及的权限检测、存储检测等以及提示。
