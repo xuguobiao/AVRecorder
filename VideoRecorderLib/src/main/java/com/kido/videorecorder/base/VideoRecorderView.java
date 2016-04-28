@@ -2,6 +2,7 @@ package com.kido.videorecorder.base;
 
 import android.content.Context;
 import android.hardware.Camera;
+import android.media.CamcorderProfile;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Handler;
@@ -177,7 +178,6 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
    */
   private void initRecord() {
 
-
     mMediaRecorder = new MediaRecorder();
     mMediaRecorder.reset();
     if (mCamera != null) {
@@ -195,11 +195,16 @@ public class VideoRecorderView extends LinearLayout implements MediaRecorder.OnE
     mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC); // Call this after setOutputFormat() but before prepare().
     mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.MPEG_4_SP); // Call this after setOutputFormat() and before prepare().
 
-    mMediaRecorder.setVideoSize(Config.VIDEO_WIDTH, Config.VIDEO_HEIGHT);
+    mMediaRecorder.setVideoSize(Config.VIDEO_WIDTH, Config.VIDEO_HEIGHT); // hengshup
     mMediaRecorder.setVideoFrameRate(Config.VIDEO_FRAME_RATE);
     mMediaRecorder.setVideoEncodingBitRate(Config.VIDEO_ENCODING_BIT_RATE);
-//        mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
+
+    CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_CIF);
+//    profile.fileFormat = MediaRecorder.OutputFormat.MPEG_4;
+//    profile.videoCodec = MediaRecorder.VideoEncoder.MPEG_4_SP;
+//    mMediaRecorder.setProfile(profile);
     mMediaRecorder.setOrientationHint(Config.VIDEO_ORIENTATION);
+
 
     mMediaRecorder.setMaxDuration(sRecordMaxTime * 1000);
     mMediaRecorder.setOutputFile(mRecordFile.getAbsolutePath());

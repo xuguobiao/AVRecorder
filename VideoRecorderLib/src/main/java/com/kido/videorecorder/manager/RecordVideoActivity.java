@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.kido.videorecorder.R;
+import com.kido.videorecorder.base.Config;
 import com.kido.videorecorder.base.PhoneUtil;
 import com.kido.videorecorder.base.VideoRecorderView;
 
@@ -51,7 +52,8 @@ public class RecordVideoActivity extends Activity implements View.OnClickListene
     ViewGroup.LayoutParams params = mRecoderView.getLayoutParams();
     int[] dev = PhoneUtil.getResolution(this);
     params.width = dev[0];
-    params.height = (int) (((float) dev[0]));
+    float h2w = Config.VIDEO_HEIGHT * 1f / Config.VIDEO_WIDTH; // horizontal value
+    params.height = (int) (dev[0] / h2w); // current orientation is vertical
     mRecoderView.setLayoutParams(params);
     mRecoderView.setRecorderListener(new VideoRecorderListener());
     mVideoControllerButton.setOnTouchListener(new VideoTouchListener());
@@ -63,9 +65,9 @@ public class RecordVideoActivity extends Activity implements View.OnClickListene
     // TODO: 2016/4/27 Kido: let stop being destroy
     super.onStop();
   }
-  
+
   @Override
-  protected  void onDestroy(){
+  protected void onDestroy() {
     // TODO: 2016/4/27 Kido: do some release here
     mRecoderView.releaseAll();
     super.onDestroy();

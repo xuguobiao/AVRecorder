@@ -70,8 +70,8 @@
 
     <Button
         android:id="@+id/videoControllerButton"
-        android:layout_width="128dp"
-        android:layout_height="128dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:text="@string/pressing_capture"
         android:background="@drawable/dot_green_border_selector"
         android:textColor="@color/tv_green2white_selector"
