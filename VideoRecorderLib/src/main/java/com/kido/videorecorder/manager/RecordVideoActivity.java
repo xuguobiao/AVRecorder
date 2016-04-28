@@ -38,7 +38,6 @@ public class RecordVideoActivity extends Activity implements View.OnClickListene
   private static final float RATIO = 1f * OUTPUT_WIDTH / OUTPUT_HEIGHT;
 
   private Camera mCamera;
-
   private WXLikeVideoRecorder mRecorder;
 
   private TextView mStartTextView;
