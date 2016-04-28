@@ -152,3 +152,4 @@ public static final int FAILURE_CODE_EXEPTION = -500;
 
 7. 多机型测试，估计会存在一些bug。 
 
+8. 第一版用的ffmpeg对视频的自定义更强一点，但是依赖的库文件过大。 
